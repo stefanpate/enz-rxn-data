@@ -1,0 +1,40 @@
+<cml>
+  <MDocument>
+    <MChemicalStruct>
+      <molecule molID="m1">
+        <atomArray>
+          <atom id="a1" elementType="O" x2="-0.4536533270374406" y2="6.879186646299842" mrvExtraLabel="chebi:15377" lonePair="2"/>
+          <atom id="a2" elementType="C" x2="0.4210133399652263" y2="8.111853325771841" mrvExtraLabel="chebi:16199"/>
+          <atom id="a3" elementType="O" x2="1.0039466839684263" y2="9.08999998628" mrvExtraLabel="chebi:16199" lonePair="2"/>
+          <atom id="a4" elementType="N" x2="4.421226662630186" y2="4.839999986280002" mrvExtraLabel="chebi:16199" lonePair="1"/>
+          <atom id="a5" elementType="H" x2="2.759544926092498" y2="3.6450520569964944"/>
+        </atomArray>
+        <bondArray>
+          <bond atomRefs2="a3 a2" order="2" id="b1"/>
+          <bond atomRefs2="a1 a2" order="2" id="b2"/>
+          <bond atomRefs2="a4 a5" order="1" id="b3"/>
+        </bondArray>
+      </molecule>
+    </MChemicalStruct>
+    <MElectronContainer occupation="0 0" radical="0" id="o1">
+      <MElectron atomRefs="m1.a1" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a1" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o2">
+      <MElectron atomRefs="m1.a1" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a1" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o3">
+      <MElectron atomRefs="m1.a3" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a3" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o4">
+      <MElectron atomRefs="m1.a3" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a3" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o5">
+      <MElectron atomRefs="m1.a4" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a4" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+  </MDocument>
+</cml>

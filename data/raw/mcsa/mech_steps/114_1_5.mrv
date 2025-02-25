@@ -1,0 +1,44 @@
+<cml>
+  <MDocument>
+    <MChemicalStruct>
+      <molecule molID="m1">
+        <atomArray>
+          <atom id="a1" elementType="C" x2="-3.736693303439779" y2="-0.8903066595442084" mrvExtraLabel="chebi:58389"/>
+          <atom id="a2" elementType="N" x2="-3.736693303439779" y2="0.6496933281357968" formalCharge="1" mrvExtraLabel="chebi:58389"/>
+          <atom id="a3" elementType="C" x2="-5.070426626103249" y2="1.4196933219757923" mrvExtraLabel="chebi:58389"/>
+          <atom id="a4" elementType="C" x2="-2.4029599807763162" y2="1.4196933219757923" mrvExtraLabel="chebi:58389"/>
+          <atom id="a5" elementType="H" x2="-5.096706257473697" y2="5.473525283343866" mrvExtraLabel="chebi:15377"/>
+          <atom id="a6" elementType="O" x2="-5.096640029893542" y2="3.9336400051975513" mrvExtraLabel="chebi:15377" lonePair="2"/>
+          <atom id="a7" elementType="H" x2="-3.7636795801379086" y2="2.9969263961504993" mrvExtraLabel="chebi:15377"/>
+        </atomArray>
+        <bondArray>
+          <bond atomRefs2="a2 a1" order="1" id="b1"/>
+          <bond atomRefs2="a3 a2" order="2" id="b2"/>
+          <bond atomRefs2="a4 a2" order="1" id="b3"/>
+          <bond atomRefs2="a6 a5" order="1" id="b4"/>
+          <bond atomRefs2="a6 a7" order="1" id="b5"/>
+        </bondArray>
+      </molecule>
+    </MChemicalStruct>
+    <MElectronContainer occupation="0 0" radical="0" id="o1">
+      <MElectron atomRefs="m1.a6" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a6" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="1 1" radical="0" id="o2">
+      <MElectron atomRefs="m1.a6" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a6" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MEFlow arcAngle="270" id="o3">
+      <MAtomSetPoint atomRefs="m1.a3 m1.a2"/>
+      <MAtomSetPoint atomRefs="m1.a2 m1.a7"/>
+    </MEFlow>
+    <MEFlow arcAngle="270" id="o4">
+      <MAtomSetPoint atomRefs="m1.a6 m1.a7"/>
+      <MAtomSetPoint atomRefs="m1.a6"/>
+    </MEFlow>
+    <MEFlow arcAngle="90" baseElectronContainerIndex="1" baseElectronIndexInContainer="-1" id="o5">
+      <MEFlowBasePoint atomRef="m1.a6"/>
+      <MAtomSetPoint atomRefs="m1.a6 m1.a3"/>
+    </MEFlow>
+  </MDocument>
+</cml>
