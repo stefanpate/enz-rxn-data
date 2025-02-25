@@ -1,0 +1,24 @@
+[project]
+name = "enz-rxn-data"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "stefanpate", email = "stefanpate94@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "hydra-core>=1.3.2",
+    "ipykernel>=6.29.5",
+    "lxml>=5.3.1",
+    "pydantic>=2.10.6",
+    "rdkit>=2024.9.5",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+enz-rxn-data = "enz_rxn_data:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

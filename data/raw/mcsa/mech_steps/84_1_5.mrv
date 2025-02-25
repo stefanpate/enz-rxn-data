@@ -1,0 +1,403 @@
+<cml>
+  <MDocument>
+    <MChemicalStruct>
+      <molecule molID="m1">
+        <atomArray>
+          <atom id="a1" elementType="Zn" x2="2.198001535194024" y2="-0.9474031354659943" formalCharge="2" mrvExtraLabel="chebi:29105"/>
+          <atom id="a2" elementType="N" x2="-6.099857470776936" y2="-5.857449035378785" mrvExtraLabel="chebi:58462" lonePair="1"/>
+          <atom id="a3" elementType="C" x2="-4.7661783489488965" y2="-5.087449035378781" mrvExtraLabel="chebi:58462"/>
+          <atom id="a4" elementType="C" x2="-3.4324992271208616" y2="-5.857449035378782" mrvExtraLabel="chebi:58462"/>
+          <atom id="a5" elementType="C" x2="-3.4324992271208608" y2="-7.397449035378781" mrvExtraLabel="chebi:58462"/>
+          <atom id="a6" elementType="C" x2="-6.099857470776932" y2="-7.397449035378784" mrvExtraLabel="chebi:58462"/>
+          <atom id="a7" elementType="N" x2="-4.766178348948896" y2="-8.167449035378782" mrvExtraLabel="chebi:58462" lonePair="1"/>
+          <atom id="a8" elementType="N" x2="-2.098820105292825" y2="-5.087449035378783" mrvExtraLabel="chebi:58462" lonePair="1"/>
+          <atom id="a9" elementType="N" x2="-2.098820105292825" y2="-8.167449035378784" mrvExtraLabel="chebi:58462" lonePair="1"/>
+          <atom id="a10" elementType="C" x2="-0.7651409834647893" y2="-5.857449035378783" mrvExtraLabel="chebi:58462"/>
+          <atom id="a11" elementType="C" x2="-0.7651409834647893" y2="-7.3974490353787825"/>
+          <atom id="a12" elementType="N" x2="-7.433536592604966" y2="-8.167449035378786" lonePair="1"/>
+          <atom id="a13" elementType="O" x2="-4.766178348948898" y2="-3.5474490353787806" lonePair="2"/>
+          <atom id="a14" elementType="C" x2="3.0306579951879105" y2="-5.908402582704404"/>
+          <atom id="a15" elementType="C" x2="0.5685381383632446" y2="-5.087449035378783"/>
+          <atom id="a16" elementType="O" x2="0.5685381383632464" y2="-3.5474490353787824" lonePair="2"/>
+          <atom id="a17" elementType="C" x2="2.004836453606983" y2="-5.139114681468865"/>
+          <atom id="a18" elementType="O" x2="7.236933747503421" y2="-4.317449035378784" lonePair="2"/>
+          <atom id="a19" elementType="O" x2="9.904291991159493" y2="-5.857449035378785" lonePair="2"/>
+          <atom id="a20" elementType="O" x2="10.467971112987527" y2="-3.7537699135507494" lonePair="2"/>
+          <atom id="a21" elementType="O" x2="6.673254625675387" y2="-6.4211281572068195" lonePair="2"/>
+          <atom id="a22" elementType="O" x2="7.800612869331459" y2="-6.4211281572068195" lonePair="2"/>
+          <atom id="a23" elementType="O" x2="12.571650234815564" y2="-4.317449035378784" formalCharge="-1" lonePair="3"/>
+          <atom id="a24" elementType="O" x2="2.004836453606983" y2="-3.600538878997788" lonePair="2"/>
+          <atom id="a25" elementType="O" x2="4.569575503847352" y2="-5.857449035378785" formalCharge="-1" lonePair="3"/>
+          <atom id="a26" elementType="P" x2="8.570612869331459" y2="-5.087449035378786"/>
+          <atom id="a27" elementType="O" x2="9.340612869331459" y2="-3.7537699135507494" formalCharge="-1" lonePair="3"/>
+          <atom id="a28" elementType="P" x2="11.23797111298753" y2="-5.087449035378785"/>
+          <atom id="a29" elementType="O" x2="12.007971112987526" y2="-6.4211281572068195" formalCharge="-1" lonePair="3"/>
+          <atom id="a30" elementType="P" x2="5.9032546256753875" y2="-5.087449035378785"/>
+          <atom id="a31" elementType="O" x2="5.133254625675388" y2="-3.7537699135507494" formalCharge="-1" lonePair="3"/>
+          <atom id="a32" elementType="C" x2="-0.2824617481649825" y2="6.749461807603978" mrvAlias="His23A"/>
+          <atom id="a33" elementType="C" x2="0.5393981206757177" y2="5.014521849484402"/>
+          <atom id="a34" elementType="C" x2="2.0709618395428584" y2="4.853548016052222"/>
+          <atom id="a35" elementType="C" x2="3.1014229733354997" y2="5.997991047287408"/>
+          <atom id="a36" elementType="N" x2="4.508282978105106" y2="5.371616616950672" lonePair="1"/>
+          <atom id="a37" elementType="C" x2="4.347309144672918" y2="3.840052898083532"/>
+          <atom id="a38" elementType="N" x2="2.840961839542859" y2="3.5198688942241807" lonePair="1"/>
+          <atom id="a39" elementType="C" x2="-0.9906611564976711" y2="-11.51728735704765" mrvAlias="Cys42A"/>
+          <atom id="a40" elementType="C" x2="0.42015862771982526" y2="-10.404224993791956"/>
+          <atom id="a41" elementType="S" x2="0.4201586277198288" y2="-8.864224993791957" lonePair="2"/>
+          <atom id="a42" elementType="C" x2="-3.2077273472727117" y2="2.3936426607061554" mrvAlias="His48A"/>
+          <atom id="a43" elementType="C" x2="-2.0733193529740492" y2="1.0508702619332455"/>
+          <atom id="a44" elementType="C" x2="-0.666459348204445" y2="1.677244692269979"/>
+          <atom id="a45" elementType="C" x2="-0.3462753443450972" y2="3.183591997400039"/>
+          <atom id="a46" elementType="N" x2="1.1852883745220453" y2="3.344565830832228" lonePair="1"/>
+          <atom id="a47" elementType="C" x2="1.8116628048587788" y2="1.9377058260626248"/>
+          <atom id="a48" elementType="N" x2="0.6672197736235916" y2="0.9072446922699813" lonePair="1"/>
+          <atom id="a49" elementType="C" x2="8.595060526104815" y2="0.2553215256806589" mrvAlias="His50A"/>
+          <atom id="a50" elementType="C" x2="6.702364640389115" y2="0.04171916620134963"/>
+          <atom id="a51" elementType="C" x2="6.210819626285906" y2="0.9203715335614637"/>
+          <atom id="a52" elementType="C" x2="6.531003630145255" y2="2.4267188386915235"/>
+          <atom id="a53" elementType="N" x2="5.1973245083172195" y2="3.196718838691525" lonePair="1"/>
+          <atom id="a54" elementType="C" x2="4.052881477082034" y2="2.166257704898883"/>
+          <atom id="a55" elementType="N" x2="4.679255907418764" y2="0.7593977001292758" lonePair="1"/>
+          <atom id="a56" elementType="C" x2="-5.641834881306707" y2="1.876522218916402" mrvAlias="Glu133A"/>
+          <atom id="a57" elementType="C" x2="-4.308155759478671" y2="1.1065222189163988"/>
+          <atom id="a58" elementType="C" x2="-4.308155759478671" y2="-0.4334777810836039"/>
+          <atom id="a59" elementType="C" x2="-2.9744766376506373" y2="-1.2034777810836035"/>
+          <atom id="a60" elementType="O" x2="-2.9744766376506373" y2="-2.7434777810836013" lonePair="2"/>
+          <atom id="a61" elementType="O" x2="-1.6407975158226007" y2="-0.43347778108360213" lonePair="2"/>
+          <atom id="a62" elementType="C" x2="11.438403415697467" y2="-11.113143695979076" mrvAlias="Asp88BB"/>
+          <atom id="a63" elementType="C" x2="10.104724293869433" y2="-10.343143695979077"/>
+          <atom id="a64" elementType="C" x2="10.104724293869433" y2="-8.803143695979077"/>
+          <atom id="a65" elementType="O" x2="8.771045172041395" y2="-8.033143695979078" formalCharge="-1" lonePair="3"/>
+          <atom id="a66" elementType="O" x2="11.438403415697467" y2="-8.033143695979076" lonePair="2"/>
+          <atom id="a67" elementType="C" x2="4.138106403793538" y2="-11.815925946924423" mrvAlias="His89BB"/>
+          <atom id="a68" elementType="C" x2="3.3825877009560674" y2="-10.661827387876464"/>
+          <atom id="a69" elementType="C" x2="4.287776989486476" y2="-9.415941216539043"/>
+          <atom id="a70" elementType="C" x2="5.827776989486475" y2="-9.415941216539043"/>
+          <atom id="a71" elementType="N" x2="6.303663160823897" y2="-7.951314181444507" lonePair="1"/>
+          <atom id="a72" elementType="C" x2="5.057776989486479" y2="-7.046124892914094"/>
+          <atom id="a73" elementType="N" x2="3.8118908181490543" y2="-7.951314181444504" formalCharge="1"/>
+          <atom id="a74" elementType="H" x2="-0.9423914865419976" y2="-3.249637570549607"/>
+          <atom id="a75" elementType="H" x2="3.5168059097428843" y2="-3.308052360142463"/>
+          <atom id="a76" elementType="H" x2="2.5871710828811976" y2="-7.9692249937919595"/>
+          <atom id="a77" elementType="H" x2="0.27364717744583855" y2="-6.706899711920046"/>
+          <atom id="a78" elementType="H" x2="1.4083626419655033" y2="-7.174442108978097"/>
+        </atomArray>
+        <bondArray>
+          <bond atomRefs2="a3 a2" order="1" id="b1"/>
+          <bond atomRefs2="a3 a13" order="2" id="b2"/>
+          <bond atomRefs2="a3 a4" order="1" id="b3"/>
+          <bond atomRefs2="a4 a5" order="2" id="b4"/>
+          <bond atomRefs2="a2 a6" order="1" id="b5"/>
+          <bond atomRefs2="a6 a12" order="1" id="b6"/>
+          <bond atomRefs2="a7 a5" order="1" id="b7"/>
+          <bond atomRefs2="a6 a7" order="2" id="b8"/>
+          <bond atomRefs2="a8 a4" order="1" id="b9"/>
+          <bond atomRefs2="a5 a9" order="1" id="b10"/>
+          <bond atomRefs2="a8 a10" order="1" id="b11"/>
+          <bond atomRefs2="a10 a15" order="1" id="b12"/>
+          <bond atomRefs2="a11 a10" order="1" id="b13"/>
+          <bond atomRefs2="a9 a11" order="1" id="b14"/>
+          <bond atomRefs2="a17 a14" order="2" id="b15"/>
+          <bond atomRefs2="a15 a17" order="1" id="b16"/>
+          <bond atomRefs2="a15 a16" order="2" id="b17"/>
+          <bond atomRefs2="a17 a24" order="1" id="b18">
+            <bondStereo>H</bondStereo>
+          </bond>
+          <bond atomRefs2="a30 a18" order="1" id="b19"/>
+          <bond atomRefs2="a18 a26" order="1" id="b20"/>
+          <bond atomRefs2="a26 a19" order="1" id="b21"/>
+          <bond atomRefs2="a19 a28" order="1" id="b22"/>
+          <bond atomRefs2="a28 a20" order="2" id="b23"/>
+          <bond atomRefs2="a30 a21" order="2" id="b24"/>
+          <bond atomRefs2="a26 a22" order="2" id="b25"/>
+          <bond atomRefs2="a28 a23" order="1" id="b26"/>
+          <bond atomRefs2="a25 a30" order="1" id="b27"/>
+          <bond atomRefs2="a26 a27" order="1" id="b28"/>
+          <bond atomRefs2="a28 a29" order="1" id="b29"/>
+          <bond atomRefs2="a30 a31" order="1" id="b30"/>
+          <bond atomRefs2="a32 a33" order="1" id="b31"/>
+          <bond atomRefs2="a33 a34" order="1" id="b32"/>
+          <bond atomRefs2="a34 a35" order="2" id="b33"/>
+          <bond atomRefs2="a34 a38" order="1" id="b34"/>
+          <bond atomRefs2="a35 a36" order="1" id="b35"/>
+          <bond atomRefs2="a36 a37" order="1" id="b36"/>
+          <bond atomRefs2="a37 a38" order="2" id="b37"/>
+          <bond atomRefs2="a39 a40" order="1" id="b38"/>
+          <bond atomRefs2="a40 a41" order="1" id="b39"/>
+          <bond atomRefs2="a42 a43" order="1" id="b40"/>
+          <bond atomRefs2="a43 a44" order="1" id="b41"/>
+          <bond atomRefs2="a44 a45" order="2" id="b42"/>
+          <bond atomRefs2="a44 a48" order="1" id="b43"/>
+          <bond atomRefs2="a45 a46" order="1" id="b44"/>
+          <bond atomRefs2="a46 a47" order="1" id="b45"/>
+          <bond atomRefs2="a47 a48" order="2" id="b46"/>
+          <bond atomRefs2="a49 a50" order="1" id="b47"/>
+          <bond atomRefs2="a50 a51" order="1" id="b48"/>
+          <bond atomRefs2="a51 a52" order="2" id="b49"/>
+          <bond atomRefs2="a51 a55" order="1" id="b50"/>
+          <bond atomRefs2="a52 a53" order="1" id="b51"/>
+          <bond atomRefs2="a53 a54" order="1" id="b52"/>
+          <bond atomRefs2="a54 a55" order="2" id="b53"/>
+          <bond atomRefs2="a56 a57" order="1" id="b54"/>
+          <bond atomRefs2="a57 a58" order="1" id="b55"/>
+          <bond atomRefs2="a58 a59" order="1" id="b56"/>
+          <bond atomRefs2="a59 a60" order="1" id="b57"/>
+          <bond atomRefs2="a59 a61" order="2" id="b58"/>
+          <bond atomRefs2="a62 a63" order="1" id="b59"/>
+          <bond atomRefs2="a63 a64" order="1" id="b60"/>
+          <bond atomRefs2="a64 a65" order="1" id="b61"/>
+          <bond atomRefs2="a64 a66" order="2" id="b62"/>
+          <bond atomRefs2="a67 a68" order="1" id="b63"/>
+          <bond atomRefs2="a68 a69" order="1" id="b64"/>
+          <bond atomRefs2="a69 a70" order="2" id="b65"/>
+          <bond atomRefs2="a69 a73" order="1" id="b66"/>
+          <bond atomRefs2="a70 a71" order="1" id="b67"/>
+          <bond atomRefs2="a71 a72" order="1" id="b68"/>
+          <bond atomRefs2="a72 a73" order="2" id="b69"/>
+          <bond atomRefs2="a16 a1" convention="cxn:coord" id="b70"/>
+          <bond atomRefs2="a24 a1" convention="cxn:coord" id="b71"/>
+          <bond atomRefs2="a24 a75" order="1" id="b72"/>
+          <bond atomRefs2="a48 a1" convention="cxn:coord" id="b73"/>
+          <bond atomRefs2="a55 a1" convention="cxn:coord" id="b74"/>
+          <bond atomRefs2="a38 a1" convention="cxn:coord" id="b75"/>
+          <bond atomRefs2="a73 a76" order="1" id="b76"/>
+          <bond atomRefs2="a10 a77" order="1" id="b77"/>
+          <bond atomRefs2="a60 a74" order="1" id="b78"/>
+          <bond atomRefs2="a41 a78" order="1" id="b79"/>
+        </bondArray>
+      </molecule>
+    </MChemicalStruct>
+    <MElectronContainer occupation="0 0" radical="0" id="o1">
+      <MElectron atomRefs="m1.a2" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a2" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o2">
+      <MElectron atomRefs="m1.a7" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a7" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o3">
+      <MElectron atomRefs="m1.a8" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a8" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o4">
+      <MElectron atomRefs="m1.a9" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a9" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o5">
+      <MElectron atomRefs="m1.a12" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a12" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o6">
+      <MElectron atomRefs="m1.a13" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a13" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o7">
+      <MElectron atomRefs="m1.a13" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a13" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o8">
+      <MElectron atomRefs="m1.a16" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a16" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o9">
+      <MElectron atomRefs="m1.a16" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a16" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o10">
+      <MElectron atomRefs="m1.a18" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a18" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o11">
+      <MElectron atomRefs="m1.a18" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a18" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o12">
+      <MElectron atomRefs="m1.a19" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a19" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o13">
+      <MElectron atomRefs="m1.a19" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a19" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o14">
+      <MElectron atomRefs="m1.a20" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a20" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o15">
+      <MElectron atomRefs="m1.a20" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a20" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o16">
+      <MElectron atomRefs="m1.a21" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a21" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o17">
+      <MElectron atomRefs="m1.a21" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a21" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o18">
+      <MElectron atomRefs="m1.a22" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a22" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o19">
+      <MElectron atomRefs="m1.a22" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a22" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o20">
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o21">
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o22">
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a23" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o23">
+      <MElectron atomRefs="m1.a24" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a24" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o24">
+      <MElectron atomRefs="m1.a24" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a24" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o25">
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o26">
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o27">
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a25" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o28">
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o29">
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o30">
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a27" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o31">
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o32">
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o33">
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a29" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o34">
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="1 1" radical="0" id="o35">
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o36">
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a31" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o37">
+      <MElectron atomRefs="m1.a36" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a36" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o38">
+      <MElectron atomRefs="m1.a38" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a38" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o39">
+      <MElectron atomRefs="m1.a41" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a41" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o40">
+      <MElectron atomRefs="m1.a41" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a41" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o41">
+      <MElectron atomRefs="m1.a46" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a46" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o42">
+      <MElectron atomRefs="m1.a48" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a48" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o43">
+      <MElectron atomRefs="m1.a53" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a53" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o44">
+      <MElectron atomRefs="m1.a55" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a55" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o45">
+      <MElectron atomRefs="m1.a60" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a60" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o46">
+      <MElectron atomRefs="m1.a60" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a60" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o47">
+      <MElectron atomRefs="m1.a61" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a61" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o48">
+      <MElectron atomRefs="m1.a61" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a61" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o49">
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o50">
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o51">
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a65" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o52">
+      <MElectron atomRefs="m1.a66" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a66" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o53">
+      <MElectron atomRefs="m1.a66" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a66" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MElectronContainer occupation="0 0" radical="0" id="o54">
+      <MElectron atomRefs="m1.a71" difLoc="0.0 0.0 0.0"/>
+      <MElectron atomRefs="m1.a71" difLoc="0.0 0.0 0.0"/>
+    </MElectronContainer>
+    <MEFlow arcAngle="270" id="o55">
+      <MAtomSetPoint atomRefs="m1.a24 m1.a75"/>
+      <MAtomSetPoint atomRefs="m1.a17 m1.a24"/>
+    </MEFlow>
+    <MEFlow arcAngle="270" id="o56">
+      <MAtomSetPoint atomRefs="m1.a17 m1.a14"/>
+      <MAtomSetPoint atomRefs="m1.a14 m1.a78"/>
+    </MEFlow>
+    <MEFlow arcAngle="270" id="o57">
+      <MAtomSetPoint atomRefs="m1.a41 m1.a78"/>
+      <MAtomSetPoint atomRefs="m1.a41"/>
+    </MEFlow>
+    <MEFlow arcAngle="270" baseElectronContainerIndex="1" baseElectronIndexInContainer="-1" id="o58">
+      <MEFlowBasePoint atomRef="m1.a31"/>
+      <MAtomSetPoint atomRefs="m1.a31 m1.a75"/>
+    </MEFlow>
+  </MDocument>
+</cml>

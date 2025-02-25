@@ -1,0 +1,1168 @@
+{
+    "1003": {
+        "mcsa_id": 1003,
+        "enzyme_name": "Aspartate Ammonia Lyase",
+        "reference_uniprot_id": "Q9LCC6",
+        "is_reference_uniprot_id": true,
+        "description": "Aspartate Ammonia Lyase is one of the three ammonia lyases that belong to aspartate/fumarase superfamily. It catalyses the reversible reaction of L-aspartate to make ammonia and fumarate and is important  in microbial nitrogen metabolism. It is also an industrial precursor for the synthesis of food additives and artificial sweeteners.",
+        "protein": {
+            "sequences": [
+                {
+                    "uniprot_id": "Q9LCC6"
+                }
+            ]
+        },
+        "residues": [
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor, increase basicity, proton donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "activator",
+                        "function_type": "spectator",
+                        "function": "increase basicity",
+                        "emo": "EMO_00042"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "proton shuttle (general acid/base)",
+                        "function_type": "reactant",
+                        "function": "proton donor",
+                        "emo": "EMO_00068"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "His",
+                        "resid": 188,
+                        "auth_resid": 188,
+                        "is_reference": true,
+                        "domain_name": "A02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "His",
+                        "is_reference": true,
+                        "resid": 188
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "proton donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "proton shuttle (general acid/base)",
+                        "function_type": "reactant",
+                        "function": "proton donor",
+                        "emo": "EMO_00068"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "C",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "C",
+                        "assembly": "",
+                        "code": "Ser",
+                        "resid": 318,
+                        "auth_resid": 318,
+                        "is_reference": true,
+                        "domain_name": "C02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Ser",
+                        "is_reference": true,
+                        "resid": 318
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Thr",
+                        "resid": 187,
+                        "auth_resid": 187,
+                        "is_reference": true,
+                        "domain_name": "A02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Thr",
+                        "is_reference": true,
+                        "resid": 187
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "C",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "C",
+                        "assembly": "",
+                        "code": "Lys",
+                        "resid": 324,
+                        "auth_resid": 324,
+                        "is_reference": true,
+                        "domain_name": "C02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Lys",
+                        "is_reference": true,
+                        "resid": 324
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "B",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "B",
+                        "assembly": "",
+                        "code": "Asn",
+                        "resid": 142,
+                        "auth_resid": 142,
+                        "is_reference": true,
+                        "domain_name": "B02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Asn",
+                        "is_reference": true,
+                        "resid": 142
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "B",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "B",
+                        "assembly": "",
+                        "code": "Ser",
+                        "resid": 140,
+                        "auth_resid": 140,
+                        "is_reference": true,
+                        "domain_name": "B02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Ser",
+                        "is_reference": true,
+                        "resid": 140
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "B",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "B",
+                        "assembly": "",
+                        "code": "Thr",
+                        "resid": 141,
+                        "auth_resid": 141,
+                        "is_reference": true,
+                        "domain_name": "B02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Thr",
+                        "is_reference": true,
+                        "resid": 141
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "C",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "C",
+                        "assembly": "",
+                        "code": "Ser",
+                        "resid": 319,
+                        "auth_resid": 319,
+                        "is_reference": true,
+                        "domain_name": "C02",
+                        "domain_cath_id": "1.20.200.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Ser",
+                        "is_reference": true,
+                        "resid": 319
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1003,
+                "roles_summary": "hydrogen bond donor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "B",
+                        "pdb_id": "3r6v",
+                        "assembly_chain_name": "B",
+                        "assembly": "",
+                        "code": "Thr",
+                        "resid": 101,
+                        "auth_resid": 101,
+                        "is_reference": true,
+                        "domain_name": "B01",
+                        "domain_cath_id": "1.10.275.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Thr",
+                        "is_reference": true,
+                        "resid": 101
+                    }
+                ]
+            }
+        ],
+        "all_ecs": [
+            "4.3.1.1"
+        ],
+        "reaction": {
+            "ec": "4.3.1.1",
+            "compounds": [
+                {
+                    "count": 1,
+                    "type": "reactant",
+                    "chebi_id": "29991",
+                    "name": "L-aspartate(1-)",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/29991_yk57QnM.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "29806",
+                    "name": "fumarate(2-)",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/29806.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "28938",
+                    "name": "ammonium",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/28938.mol"
+                }
+            ],
+            "mechanisms": [
+                {
+                    "mechanism_id": 1,
+                    "is_detailed": true,
+                    "mechanism_text": "Aspartate ammonia lyase (Asp) catalyses the reversible reaction of L-aspartate to give fumarate and ammonia. The first and the rate limiting step is the deprotonation of L-aspartate by the catalytic base Ser318 followed by the displacement of the ammonia through the rearrangement of the double bond formed in the enediolate intermediate to form fumarate and ammonia as a product.",
+                    "rating": 3,
+                    "components_summary": "overall product formed, proton transfer, unimolecular elimination by the conjugate base, rate-determining step",
+                    "steps": [
+                        {
+                            "step_id": 1,
+                            "description": "Ser318 acts as a catalytic base and deprotonates the C\u03b2 proton of  L-aspartate substrate.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_10_1_1",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_10_1_1.mrv"
+                        },
+                        {
+                            "step_id": 2,
+                            "description": "Rearrangement of double bond displaces the NH<sub>3<sup>+. His188 loses a proton to the leaving ammonia.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_10_1_2",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_10_1_2.mrv"
+                        },
+                        {
+                            "step_id": 3,
+                            "description": "Product is formed.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_10_1_3",
+                            "is_product": true,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_10_1_3.mrv"
+                        }
+                    ],
+                    "references": [
+                        {
+                            "pubmed_id": "19490103",
+                            "doi": "10.1111/j.1742-4658.2009.07015.x",
+                            "title": "Site-directed mutagenesis, kinetic and inhibition studies of aspartate ammonia lyase from Bacillus sp. YM55-1.",
+                            "evidence_types": [
+                                "inferred from mutant phenotype"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "21661762",
+                            "doi": "10.1021/bi200497y",
+                            "title": "Structural basis for the catalytic mechanism of aspartate ammonia lyase.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "22834890",
+                            "doi": "10.1021/cb3002792",
+                            "title": "Catalytic Mechanisms and Biocatalytic Applications of Aspartate and Methylaspartate Ammonia Lyases",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        },
+                        {
+                            "pubmed_id": null,
+                            "doi": "10.2210/pdb3r6v/pdb",
+                            "title": "Crystal structure of aspartase from Bacillus sp. YM55-1 with bound L-aspartate",
+                            "evidence_types": [
+                                "crystallography evidence"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "24875395",
+                            "doi": "10.1016/j.jmgm.2014.05.003",
+                            "title": "A QM/MM study of the catalytic mechanism of aspartate ammonia lyase.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "is_polymeric": false
+        }
+    },
+    "1004": {
+        "mcsa_id": 1004,
+        "enzyme_name": "isopentenyl phosphate kinase (IPK)",
+        "reference_uniprot_id": "Q9HLX1",
+        "is_reference_uniprot_id": true,
+        "description": "Isopentenyl phosphate kinase belongs to the amino acid kinase (AAK) superfamily and catalyses the phosphorylation reactions that yield isopentenyl diphosphate. It is both a magnesium ion- and ATP-dependent enzyme. Isopentenyl diphosphate is an attractive alternative to the common non-renewable fuels and hence research on this enzyme provides a promising approach for the production of renewable and environmentally friendly biofuels.",
+        "protein": {
+            "sequences": [
+                {
+                    "uniprot_id": "Q9HLX1"
+                }
+            ]
+        },
+        "residues": [
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "electrostatic stabiliser, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic stabiliser",
+                        "emo": "EMO_00033"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Lys",
+                        "resid": 9,
+                        "auth_resid": 5,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Lys",
+                        "is_reference": true,
+                        "resid": 5
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "electrostatic stabiliser, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic stabiliser",
+                        "emo": "EMO_00033"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Lys",
+                        "resid": 18,
+                        "auth_resid": 14,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Lys",
+                        "is_reference": true,
+                        "resid": 14
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "electrostatic stabiliser, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic stabiliser",
+                        "emo": "EMO_00033"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Lys",
+                        "resid": 209,
+                        "auth_resid": 205,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Lys",
+                        "is_reference": true,
+                        "resid": 205
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "electrostatic interaction, electrostatic stabiliser, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic stabiliser",
+                        "emo": "EMO_00033"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic interaction",
+                        "emo": "EMO_00032"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "His",
+                        "resid": 54,
+                        "auth_resid": 50,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "His",
+                        "is_reference": true,
+                        "resid": 50
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "electrostatic stabiliser, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "electrostatic stabiliser",
+                        "emo": "EMO_00033"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Asp",
+                        "resid": 148,
+                        "auth_resid": 144,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Asp",
+                        "is_reference": true,
+                        "resid": 144
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "hydrogen bond donor, transition state stabiliser",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    },
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Thr",
+                        "resid": 167,
+                        "auth_resid": 163,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Thr",
+                        "is_reference": true,
+                        "resid": 163
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "hydrogen bond donor, transition state stabiliser",
+                "function_location_abv": "main-N",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Gly",
+                        "resid": 49,
+                        "auth_resid": 45,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Gly",
+                        "is_reference": true,
+                        "resid": 45
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1004,
+                "roles_summary": "hydrogen bond donor, transition state stabiliser",
+                "function_location_abv": "main-N",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "electrostatic interaction",
+                        "function_type": "spectator",
+                        "function": "transition state stabiliser",
+                        "emo": "EMO_00035"
+                    },
+                    {
+                        "group_function": "",
+                        "function_type": "interaction",
+                        "function": "hydrogen bond donor",
+                        "emo": "EMO_00114"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "3lkk",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Gly",
+                        "resid": 12,
+                        "auth_resid": 8,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.1160.10"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Gly",
+                        "is_reference": true,
+                        "resid": 8
+                    }
+                ]
+            }
+        ],
+        "all_ecs": [
+            "2.7.4.26"
+        ],
+        "reaction": {
+            "ec": "2.7.4.26",
+            "compounds": [
+                {
+                    "count": 1,
+                    "type": "reactant",
+                    "chebi_id": "30616",
+                    "name": "ATP(4-)",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/30616.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "reactant",
+                    "chebi_id": "65078",
+                    "name": "isopentenyl phosphate(2-)",
+                    "mol_file": ""
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "456216",
+                    "name": "ADP(3-)",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/456216_kvRVboc.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "128769",
+                    "name": "isopentenyl diphosphate(3-)",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/128769.mol"
+                }
+            ],
+            "mechanisms": [
+                {
+                    "mechanism_id": 1,
+                    "is_detailed": true,
+                    "mechanism_text": "The reaction proceeds through a single SN2 step where the phosphate of isopentenyl phosphate attacks the terminal phosphate of ATP.",
+                    "rating": 3,
+                    "components_summary": "overall product formed, overall reactant used, bimolecular nucleophilic addition",
+                    "steps": [
+                        {
+                            "step_id": 1,
+                            "description": "ATP performs a nucleophilic attack on isopentenyl phosphate, forming isopentenyl diphosphate.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_8_1_1",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_8_1_1.mrv"
+                        },
+                        {
+                            "step_id": 2,
+                            "description": "Product.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_8_1_2",
+                            "is_product": true,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_8_1_2.mrv"
+                        }
+                    ],
+                    "references": [
+                        {
+                            "pubmed_id": "29155589",
+                            "doi": "10.1021/acs.jpcb.7b08770",
+                            "title": "Reaction Mechanism of Isopentenyl Phosphate Kinase: A QM/MM Study.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "20392112",
+                            "doi": "10.1021/cb1000313",
+                            "title": "Mutation of archaeal isopentenyl phosphate kinase highlights mechanism and guides phosphorylation of additional isoprenoid monophosphates.",
+                            "evidence_types": [
+                                "inferred from mutant phenotype"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "30848915",
+                            "doi": "10.1021/acs.jpcb.9b00547",
+                            "title": "Phosphorylation Mechanism of N-Acetyl-l-glutamate Kinase, a QM/MM Study.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        },
+                        {
+                            "pubmed_id": null,
+                            "doi": "10.2210/pdb3lkk/pdb",
+                            "title": "Crystal structure of the isopentenyl phosphate kinase substrate complex",
+                            "evidence_types": [
+                                "crystallography evidence"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "is_polymeric": false
+        }
+    },
+    "1005": {
+        "mcsa_id": 1005,
+        "enzyme_name": "Phenylethanolamine N-methyltransferase",
+        "reference_uniprot_id": "P11086",
+        "is_reference_uniprot_id": true,
+        "description": "Phenylethanolamine N-methyltransferase (PNMT) is an enzyme that catalyses the synthesis of epinephrine from norepinephrine (NE) utilizing the cofactor S-adenosyl-L-methionine (AdoMet) as a methyl donor. Epinephrine is a naturally occurring hormone that increases cardiac output and raises glucose levels in the blood.",
+        "protein": {
+            "sequences": [
+                {
+                    "uniprot_id": "P11086"
+                }
+            ]
+        },
+        "residues": [
+            {
+                "mcsa_id": 1005,
+                "roles_summary": "proton acceptor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "proton shuttle (general acid/base)",
+                        "function_type": "reactant",
+                        "function": "proton acceptor",
+                        "emo": "EMO_00066"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "1hnn",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Glu",
+                        "resid": 219,
+                        "auth_resid": 219,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.50.150"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Glu",
+                        "is_reference": true,
+                        "resid": 219
+                    }
+                ]
+            },
+            {
+                "mcsa_id": 1005,
+                "roles_summary": "proton acceptor",
+                "function_location_abv": "",
+                "main_annotation": "",
+                "ptm": "",
+                "roles": [
+                    {
+                        "group_function": "proton shuttle (general acid/base)",
+                        "function_type": "reactant",
+                        "function": "proton acceptor",
+                        "emo": "EMO_00066"
+                    }
+                ],
+                "residue_chains": [
+                    {
+                        "chain_name": "A",
+                        "pdb_id": "1hnn",
+                        "assembly_chain_name": "A",
+                        "assembly": "",
+                        "code": "Glu",
+                        "resid": 185,
+                        "auth_resid": 185,
+                        "is_reference": true,
+                        "domain_name": "A00",
+                        "domain_cath_id": "3.40.50.150"
+                    }
+                ],
+                "residue_sequences": [
+                    {
+                        "uniprot_id": "",
+                        "code": "Glu",
+                        "is_reference": true,
+                        "resid": 185
+                    }
+                ]
+            }
+        ],
+        "all_ecs": [
+            "2.1.1.28"
+        ],
+        "reaction": {
+            "ec": "2.1.1.28",
+            "compounds": [
+                {
+                    "count": 1,
+                    "type": "reactant",
+                    "chebi_id": "72587",
+                    "name": "(R)-noradrenaline(1+)",
+                    "mol_file": ""
+                },
+                {
+                    "count": 1,
+                    "type": "reactant",
+                    "chebi_id": "59789",
+                    "name": "S-adenosyl-L-methionine zwitterion",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/59789.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "15378",
+                    "name": "hydron",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/15378_Fxpq4oZ.mol"
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "71406",
+                    "name": "(R)-adrenaline(1+)",
+                    "mol_file": ""
+                },
+                {
+                    "count": 1,
+                    "type": "product",
+                    "chebi_id": "57856",
+                    "name": "S-adenosyl-L-homocysteine zwitterion",
+                    "mol_file": "www.ebi.ac.uk/thornton-srv/m-csa/media/compound_mols/57856.mol"
+                }
+            ],
+            "mechanisms": [
+                {
+                    "mechanism_id": 1,
+                    "is_detailed": true,
+                    "mechanism_text": "Phenyl ethanolamine N-methyltransferase catalyses the synthesis of epinephrine. This reaction has three major steps: The first step is the deprotonation of protonation of protonated norepinephrine, the second and the rate limiting step is the methyl transferring step and the last step is the deprotonation of the methylated norepinephrine.",
+                    "rating": 3,
+                    "components_summary": "rate-determining step, overall reactant used, bimolecular nucleophilic substitution, proton transfer",
+                    "steps": [
+                        {
+                            "step_id": 1,
+                            "description": "The amine of Noradrenaline is deprotonated by Glu185 via a bridging water.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_9_1_1",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_9_1_1.mrv"
+                        },
+                        {
+                            "step_id": 2,
+                            "description": "SN2 nucleophilic attack from the amine to AdoHcyn. This causes transfer of methyl group from AdoHcyn to NE.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_9_1_2",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_9_1_2.mrv"
+                        },
+                        {
+                            "step_id": 3,
+                            "description": "Glu219 deprotonates the amine of AdoHcy via a bridging water.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_9_1_3",
+                            "is_product": false,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_9_1_3.mrv"
+                        },
+                        {
+                            "step_id": 4,
+                            "description": "Product.",
+                            "figure": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes_svg/abeje_entry_9_1_4",
+                            "is_product": true,
+                            "marvin_xml": "www.ebi.ac.uk/thornton-srv/m-csa/media/schemes/abeje_entry_9_1_4.mrv"
+                        }
+                    ],
+                    "references": [
+                        {
+                            "pubmed_id": "22326747",
+                            "doi": "10.1016/j.bbapap.2012.01.017",
+                            "title": "QM/MM studies on the catalytic mechanism of phenylethanolamine N-methyltransferase.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        },
+                        {
+                            "pubmed_id": "32702980",
+                            "doi": "10.1021/jacs.0c05446",
+                            "title": "Transition-State Analogues of Phenylethanolamine <i>N</i>-Methyltransferase.",
+                            "evidence_types": [
+                                "computational experiment"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "is_polymeric": false
+        }
+    }
+}
