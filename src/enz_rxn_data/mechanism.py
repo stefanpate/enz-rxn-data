@@ -139,6 +139,36 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
 
     return mols
 
+def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Path) -> tuple[tuple[Chem.Mol], tuple[Chem.Mol]]:
+    '''
+    Constructs the overall reaction from the given compounds.
+    
+    Args
+    ----
+    compounds: Iterable[dict[str, str | int]]
+        List of compounds with their Chebi ID and type (reactant or product).
+    mol_path: Path
+        Path to the directory containing the mol files.
+    
+    Returns
+    -------
+    tuple[tuple[Chem.Mol], tuple[Chem.Mol]]
+        Tuple of tuples containing the reactants and products as RDKit molecules.
+    '''
+    lhs = []
+    rhs = []
+    for c in compounds:
+        for _ in range(c['count']):
+            mol = Chem.MolFromMolFile(mol_path / f"{c['chebi_id']}.mol")
+            Chem.RemoveStereochemistry(mol)
+            
+            if c['type'] == 'reactant':
+                lhs.append(mol)
+            elif c['type'] == 'product':
+                rhs.append(mol)
+
+    return tuple(lhs), tuple(rhs)
+
 def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflows: dict[str, CmlMEFlow]) -> tuple[dict[str, CmlAtom], dict[str, CmlBond]]:
     """
     Updates the bonds in the CML file based on the MEFlow elements.
@@ -178,6 +208,7 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
     return cml_atoms, {k: v for k, v in cml_bonds.items() if v.order > 0}
 
 if __name__ == "__main__":
+    import json
     for i in range(1, 8):
         file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/49_1_{i}.mrv'
         atoms, bonds, meflows = parse_mrv(file_path)
@@ -186,3 +217,13 @@ if __name__ == "__main__":
         next_mols = construct_mols(next_atoms.values(), next_bonds.values())
         print([Chem.MolToSmiles(mol) for mol in mols])
         print([Chem.MolToSmiles(mol) for mol in next_mols])
+
+        mcsa_path = Path("/home/stef/enz_rxn_data/data/raw/mcsa")
+        mol_path = mcsa_path / "mols"
+        with open(mcsa_path / "entries_7.json", "r") as f:
+            entries = json.load(f)
+
+        cpds = entries['722']['reaction']['compounds']
+        lhs, rhs = get_overall_reaction(cpds, mol_path)
+        print([Chem.MolToSmiles(mol) for mol in lhs])
+        print([Chem.MolToSmiles(mol) for mol in rhs])

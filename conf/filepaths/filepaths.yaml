@@ -1,2 +1,6 @@
 data: /home/stef/enz_rxn_data/data
 raw_data: ${.data}/raw
+processed_data: ${.data}/processed
+raw_mcsa: ${.raw_data}/mcsa
+mcsa_mols: ${.raw_mcsa}/mols
+mcsa_mech_steps: ${.raw_mcsa}/mech_steps
