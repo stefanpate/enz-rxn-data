@@ -5,3 +5,15 @@ filepaths:
   raw_mcsa: ${.raw_data}/mcsa
   mcsa_mols: ${.raw_mcsa}/mols
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
+entry_batches:
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
