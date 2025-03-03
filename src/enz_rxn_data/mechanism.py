@@ -25,7 +25,8 @@ class CmlBond(BaseModel):
     """
     id: str
     atom_refs: tuple[str, str]
-    order: int
+    order: int | None
+    convention: str | None = None
 
 class CmlMEFlow(BaseModel):
     """
@@ -50,9 +51,19 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
     tree = etree.parse(mech_step)
     root = tree.getroot()
 
+    # Get namespace
+    tag_ns = root.tag.split('}')
+    if len(tag_ns) == 1:
+        tag = ''
+        ns = None
+    elif len(tag_ns) == 2:
+        tag = tag_ns[-1] + ':'
+        ns = {tag.strip(':') : tag_ns[0].strip('{')}
+
+
     # Extract atoms
     atoms = {}
-    for atom in root.xpath('//atomArray/atom'):
+    for atom in root.xpath(f"//{tag}atom", namespaces=ns):
         atom_data = {
             'id': atom.get('id'),
             'element_type': atom.get('elementType'),
@@ -69,18 +80,19 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
 
     # Extract bonds
     bonds = {}
-    for bond in root.xpath('//bondArray/bond'):
+    for bond in root.xpath(f"//{tag}bond", namespaces=ns):
         bond_data = {
             'id': bond.get('id'),
             'atom_refs': tuple(bond.get('atomRefs2').split(' ')),
             'order': bond.get('order'),
+            'convention': bond.get('convention')
         }
         cbond = CmlBond(**bond_data)
         bonds[cbond.atom_refs] = cbond
 
     # Extract MEFlow elements
     meflows = {}
-    for meflow in root.xpath('//MEFlow'):
+    for meflow in root.xpath(f"//{tag}MEFlow", namespaces=ns):
         from_to = [child.get('atomRef') or child.get('atomRefs') for child in meflow]
         from_to = [elt.replace('m1.', '') for elt in from_to if elt is not None]
         meflow_data = {
@@ -128,7 +140,8 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
         bond_type = bond_types.get(cbond.order)
 
         if bond_type is None:
-            raise ValueError(f"Unsupported bond type: {cbond.order}")
+            print(f"Ignoring orderless bond: {cbond.id} of convention {cbond.convention}")
+            continue
         
         from_, to = [mcsa2rdkit[atom_ref] for atom_ref in cbond.atom_refs]
 
@@ -161,7 +174,7 @@ def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Pa
         for _ in range(c['count']):
             mol = Chem.MolFromMolFile(mol_path / f"{c['chebi_id']}.mol")
             Chem.RemoveStereochemistry(mol)
-            
+
             if c['type'] == 'reactant':
                 lhs.append(mol)
             elif c['type'] == 'product':
@@ -205,12 +218,12 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
             else:
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
 
-    return cml_atoms, {k: v for k, v in cml_bonds.items() if v.order > 0}
+    return cml_atoms, {k: v for k, v in cml_bonds.items() if v.order is not None and v.order > 0}
 
 if __name__ == "__main__":
     import json
-    for i in range(1, 8):
-        file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/49_1_{i}.mrv'
+    for i in range(1, 7):
+        file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/219_2_{i}.mrv'
         atoms, bonds, meflows = parse_mrv(file_path)
         mols = construct_mols(atoms.values(), bonds.values())
         next_atoms, next_bonds = step(atoms, bonds, meflows)
@@ -218,12 +231,12 @@ if __name__ == "__main__":
         print([Chem.MolToSmiles(mol) for mol in mols])
         print([Chem.MolToSmiles(mol) for mol in next_mols])
 
-        mcsa_path = Path("/home/stef/enz_rxn_data/data/raw/mcsa")
-        mol_path = mcsa_path / "mols"
-        with open(mcsa_path / "entries_7.json", "r") as f:
-            entries = json.load(f)
+        # mcsa_path = Path("/home/stef/enz_rxn_data/data/raw/mcsa")
+        # mol_path = mcsa_path / "mols"
+        # with open(mcsa_path / "entries_7.json", "r") as f:
+        #     entries = json.load(f)
 
-        cpds = entries['722']['reaction']['compounds']
-        lhs, rhs = get_overall_reaction(cpds, mol_path)
-        print([Chem.MolToSmiles(mol) for mol in lhs])
-        print([Chem.MolToSmiles(mol) for mol in rhs])
+        # cpds = entries['722']['reaction']['compounds']
+        # lhs, rhs = get_overall_reaction(cpds, mol_path)
+        # print([Chem.MolToSmiles(mol) for mol in lhs])
+        # print([Chem.MolToSmiles(mol) for mol in rhs])
