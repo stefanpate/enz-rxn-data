@@ -149,7 +149,7 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
 
     Chem.SanitizeMol(rw_mol)
     mols = Chem.rdmolops.GetMolFrags(rw_mol, asMols=True)
-
+    
     return mols
 
 def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Path) -> tuple[tuple[Chem.Mol], tuple[Chem.Mol]]:
