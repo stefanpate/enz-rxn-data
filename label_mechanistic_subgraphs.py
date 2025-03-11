@@ -1,4 +1,5 @@
 import hydra
+import logging
 from omegaconf import DictConfig
 from pathlib import Path
 import json
@@ -25,25 +26,6 @@ def standardize_de_atom_map(mol: Chem.Mol) -> str:
     mol = standardize_mol(mol, quiet=True)
 
     return Chem.MolToSmiles(mol)
-
-# def get_standard_match(mol: Chem.Mol, query: Chem.Mol) -> tuple[bool, tuple[int, ...]]:
-#     ss_match = mol.GetSubstructMatch(query)
-#     if len(ss_match) == mol.GetNumAtoms():
-#         return True, ss_match
-    
-#     rev_ss_match = query.GetSubstructMatch(mol)
-
-#     try:
-#         _mol = standardize_mol(mol, quiet=True)
-#         _query = standardize_mol(query, quiet=True)
-#     except Exception as e:
-#         print(f"Could not standardize: {e}")
-#         did_match = len(ss_match) == max(mol.GetNumAtoms(), query.GetNumAtoms())
-#     else:
-#         _ss_match = _mol.GetSubstructMatch(_query)
-#         did_match = len(_ss_match) == max(_mol.GetNumAtoms(), _query.GetNumAtoms())
-
-#     return did_match, ss_match
 
 def translate(entering_rcts: list[Chem.Mol], prev_products: tuple[Chem.Mol], lhs: Iterable[Chem.Mol]) -> tuple[dict[str, str], tuple[Chem.Mol]]:
     '''
@@ -103,15 +85,21 @@ def transform(lhs: list[Chem.Mol], rhs: list[Chem.Mol], imt_rcts: list[Chem.Mol]
     '''
     '''
     rule = ".".join([Chem.MolToSmarts(mol) for mol in lhs]) + ">>" + ".".join([Chem.MolToSmarts(mol) for mol in rhs])
-    op = rdChemReactions.ReactionFromSmarts(rule)
-    products = op.RunReactants(imt_rcts)[0]
-    # TODO: Delete
-    # for p in products:
-    #     for atom in p.GetAtoms():
-    #         props = atom.GetPropsAsDict()
-    #         atom.SetProp('mcsa_id', f"a{props['old_mapno']}")
+    op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=False)
+    outputs = op.RunReactants(imt_rcts)
+    
+    if len(outputs) == 0:
+        op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
+        outputs = op.RunReactants(imt_rcts)
 
-    return list(products)    
+    smi_outputs = {tuple([Chem.MolToSmiles(mol) for mol in output]) for output in outputs}
+
+    if len(smi_outputs) != 1:
+        log.info(f"Multiple unique outputs for rule {rule} and reactants {[Chem.MolToSmiles(mol) for mol in imt_rcts]}")
+
+    return list(outputs[0])
+
+log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="label_mechanistic_subgraphs")
 def main(cfg: DictConfig):
@@ -123,24 +111,34 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms']
-    for entry_id in ['49', '722']:
+    for entry_id in ['722']:#entries.keys():
         reaction_entry = entries[entry_id]['reaction']
 
         for mech in reaction_entry['mechanisms']:
-            # try:
             tmp_overall_lhs, overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
             
             # Assemble steps and electron flows
+            misannotated_step = False
             elementary_steps = []
             eflows = []
             for estep in mech['steps']:
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
                 atoms, bonds, meflows = parse_mrv(file_path)
-                lhs = msm(construct_mols(atoms.values(), bonds.values()))
                 next_atoms, next_bonds = step(atoms, bonds, meflows)
-                rhs = msm(construct_mols(next_atoms.values(), next_bonds.values()))
+
+                try:
+                    lhs = msm(construct_mols(atoms.values(), bonds.values()))
+                    rhs = msm(construct_mols(next_atoms.values(), next_bonds.values()))
+                except Exception as e: # Catch errors in mechanism annotation
+                    log.info(f"Error constructing mols for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
+                    misannotated_step = True
+                    break
+                
                 elementary_steps.append((lhs, rhs))
                 eflows.append(meflows)
+
+            if misannotated_step:
+                continue
 
             # Reactants may enter at different elementary steps
             entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
@@ -170,9 +168,7 @@ def main(cfg: DictConfig):
             # Main loop
             imt_pdts = []
             for i, (estep, eflow) in enumerate(list(zip(elementary_steps, eflows))):
-                
                 entering_rcts = entry_points.get(i, [])
-
 
                 # Translate
                 one_step_translation, imt_rcts = translate(entering_rcts, imt_pdts, estep[0])
@@ -203,9 +199,6 @@ def main(cfg: DictConfig):
                 mech_atoms.append(tmp)
             
             mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms])
-            # except Exception as e:
-            #     print(f"Error processing entry {entry_id}, mechanism {mech['mechanism_id']}: {e}")
-            #     continue
 
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
     df.to_csv("mech_labeled_reactions.csv", index=False)

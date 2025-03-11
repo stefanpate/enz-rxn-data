@@ -36,6 +36,13 @@ class CmlMEFlow(BaseModel):
     from_: tuple[str, str] | tuple[str]
     to: tuple[str, str] | tuple[str]
 
+metal_ligands = {
+    'Zn',
+    'Mg',
+    'Fe',
+    'Cu',
+}
+
 def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], dict[str, CmlMEFlow]]:
     """
     Parses an MRV file and extracts atoms, bonds, and MEFlow elements.
@@ -81,10 +88,11 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
     # Extract bonds
     bonds = {}
     for bond in root.xpath(f"//{tag}bond", namespaces=ns):
+        order = bond.get('order') if bond.get('order') is not None else 1 if bond.get('convention') == 'cxn:coord' else None
         bond_data = {
             'id': bond.get('id'),
             'atom_refs': tuple(bond.get('atomRefs2').split(' ')),
-            'order': bond.get('order'),
+            'order': order,
             'convention': bond.get('convention')
         }
         cbond = CmlBond(**bond_data)
@@ -112,9 +120,10 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
     rw_mol = Chem.RWMol()
     mcsa2rdkit = {}
     bond_types = {
-        1: Chem.rdchem.BondType.SINGLE,
-        2: Chem.rdchem.BondType.DOUBLE,
-        3: Chem.rdchem.BondType.TRIPLE
+        (1, None): Chem.rdchem.BondType.SINGLE,
+        (1, 'cxn:coord'): Chem.rdchem.BondType.DATIVE,
+        (2, None): Chem.rdchem.BondType.DOUBLE,
+        (3, None): Chem.rdchem.BondType.TRIPLE
     }
     for catom in cml_atoms:
         if catom.element_type == 'R':
@@ -137,11 +146,12 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
             rw_mol.GetAtomWithIdx(aidx).SetProp('mrv_extra_label', catom.mrv_extra_label)
 
     for cbond in cml_bonds:
-        bond_type = bond_types.get(cbond.order)
+        bond_type = bond_types.get((cbond.order, cbond.convention))
 
-        if bond_type is None:
-            print(f"Ignoring orderless bond: {cbond.id} of convention {cbond.convention}")
-            continue
+        # TODO: Delete
+        # if bond_type is None:
+        #     print(f"Ignoring orderless bond: {cbond.id} of convention {cbond.convention}")
+        #     continue
         
         from_, to = [mcsa2rdkit[atom_ref] for atom_ref in cbond.atom_refs]
 
@@ -202,34 +212,49 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
     cml_atoms = {k: v.model_copy(deep=True) for k, v in cml_atoms.items()} # Defensive copy
     cml_bonds = {k: v.model_copy(deep=True) for k, v in cml_bonds.items()} # Defensive copy
     for meflow in cml_meflows.values():
-        if len(meflow.from_) == 2 and len(meflow.to) == 2:
+
+        if len(meflow.from_) == 2 and len(meflow.to) == 2: # Bond to bond
             cml_bonds[meflow.from_].order -= 1
+            
             if cml_bonds.get(meflow.to):
                 cml_bonds[meflow.to].order += 1
+            elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
+                cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
             else:
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
-        elif len(meflow.from_) == 2 and len(meflow.to) == 1:
-            cml_atoms[meflow.to[0]].formal_charge -= 1
+        
+        elif len(meflow.from_) == 2 and len(meflow.to) == 1: # Bond to lone pair
+            from_bond = cml_bonds[meflow.from_]
+            
+            if from_bond.convention is None: # Not coordinate bond
+                cml_atoms[meflow.to[0]].formal_charge -= 1
+            
             cml_bonds[meflow.from_].order -= 1
-        elif len(meflow.from_) == 1 and len(meflow.to) == 2:
-            cml_atoms[meflow.from_[0]].formal_charge += 1
+        
+        elif len(meflow.from_) == 1 and len(meflow.to) == 2: # Lone pair to bond
+            
             if cml_bonds.get(meflow.to):
                 cml_bonds[meflow.to].order += 1
+                cml_atoms[meflow.from_[0]].formal_charge += 1
+            elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
+                cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
             else:
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
+                cml_atoms[meflow.from_[0]].formal_charge += 1
 
     return cml_atoms, {k: v for k, v in cml_bonds.items() if v.order is not None and v.order > 0}
 
 if __name__ == "__main__":
     import json
-    for i in range(1, 7):
-        file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/219_2_{i}.mrv'
-        atoms, bonds, meflows = parse_mrv(file_path)
-        mols = construct_mols(atoms.values(), bonds.values())
-        next_atoms, next_bonds = step(atoms, bonds, meflows)
-        next_mols = construct_mols(next_atoms.values(), next_bonds.values())
-        print([Chem.MolToSmiles(mol) for mol in mols])
-        print([Chem.MolToSmiles(mol) for mol in next_mols])
+    # for i in range(1, 7):
+    file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/43_1_1.mrv'
+    atoms, bonds, meflows = parse_mrv(file_path)
+    mols = construct_mols(atoms.values(), bonds.values())
+    next_atoms, next_bonds = step(atoms, bonds, meflows)
+    next_mols = construct_mols(next_atoms.values(), next_bonds.values())
+    print([Chem.MolToSmiles(mol) for mol in mols])
+    print([Chem.MolToSmiles(mol) for mol in next_mols])
+    print()
 
         # mcsa_path = Path("/home/stef/enz_rxn_data/data/raw/mcsa")
         # mol_path = mcsa_path / "mols"
