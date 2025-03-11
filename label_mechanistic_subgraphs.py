@@ -111,18 +111,30 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms']
-    for entry_id in ['722']:#entries.keys():
+    for entry_id in entries.keys():
         reaction_entry = entries[entry_id]['reaction']
 
         for mech in reaction_entry['mechanisms']:
+            misannotated_mechanism = False
             tmp_overall_lhs, overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
             
+            if not tmp_overall_lhs or not overall_rhs:
+                log.info(f"Overall reaction not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                misannotated_mechanism = True
+                continue
+
+
             # Assemble steps and electron flows
-            misannotated_step = False
             elementary_steps = []
             eflows = []
             for estep in mech['steps']:
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
+                
+                if not file_path.exists():
+                    log.info(f"File {file_path} does not exist")
+                    misannotated_mechanism = True
+                    break
+                
                 atoms, bonds, meflows = parse_mrv(file_path)
                 next_atoms, next_bonds = step(atoms, bonds, meflows)
 
@@ -131,13 +143,13 @@ def main(cfg: DictConfig):
                     rhs = msm(construct_mols(next_atoms.values(), next_bonds.values()))
                 except Exception as e: # Catch errors in mechanism annotation
                     log.info(f"Error constructing mols for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
-                    misannotated_step = True
+                    misannotated_mechanism = True
                     break
                 
                 elementary_steps.append((lhs, rhs))
                 eflows.append(meflows)
 
-            if misannotated_step:
+            if misannotated_mechanism:
                 continue
 
             # Reactants may enter at different elementary steps
