@@ -145,11 +145,19 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond], i
         if catom.mrv_extra_label is not None:
             rw_mol.GetAtomWithIdx(aidx).SetProp('mrv_extra_label', catom.mrv_extra_label)
 
+        if ignore_coord: # Avoids downstream KeyError
+            rw_mol.GetAtomWithIdx(aidx).SetIntProp('coord_bond', 0)
+
     for cbond in cml_bonds:
         bond_type = bond_types.get((cbond.order, cbond.convention))
 
         if ignore_coord and cbond.convention == 'cxn:coord':
-            print(f"Ignoring bond: {cbond.id} of convention {cbond.convention}")
+            # print(f"Ignoring bond: {cbond.id} of convention {cbond.convention}")
+
+            # Mark atoms involved in coordinate bonds
+            for atom_ref in cbond.atom_refs:
+                rw_mol.GetAtomWithIdx(mcsa2rdkit[atom_ref]).SetIntProp('coord_bond', 1)
+
             continue
         
         from_, to = [mcsa2rdkit[atom_ref] for atom_ref in cbond.atom_refs]

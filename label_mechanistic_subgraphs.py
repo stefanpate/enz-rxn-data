@@ -88,9 +88,10 @@ def transform(lhs: list[Chem.Mol], rhs: list[Chem.Mol], imt_rcts: list[Chem.Mol]
     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=False)
     outputs = op.RunReactants(imt_rcts)
     
-    if len(outputs) == 0:
-        op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
-        outputs = op.RunReactants(imt_rcts)
+    # TODO: Delete
+    # if len(outputs) == 0:
+    #     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
+    #     outputs = op.RunReactants(imt_rcts)
 
     smi_outputs = {tuple([Chem.MolToSmiles(mol) for mol in output]) for output in outputs}
 
@@ -103,7 +104,7 @@ log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="label_mechanistic_subgraphs")
 def main(cfg: DictConfig):
-    msm = lambda x : [Chem.MolFromSmiles(Chem.MolToSmiles(mol)) for mol in x]
+    msm = lambda x : [Chem.MolFromSmiles(Chem.MolToSmiles(mol)) for mol in x] # TODO: Do I need this?
     entries = {}
     for i in cfg.entry_batches:
         with open(Path(cfg.filepaths.raw_mcsa) / f"entries_{i}.json", "r") as f:
@@ -111,7 +112,7 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms']
-    for entry_id in entries.keys():
+    for entry_id in ['43']: #entries.keys():
         reaction_entry = entries[entry_id]['reaction']
 
         for mech in reaction_entry['mechanisms']:
@@ -123,10 +124,10 @@ def main(cfg: DictConfig):
                 misannotated_mechanism = True
                 continue
 
-
             # Assemble steps and electron flows
             elementary_steps = []
             eflows = []
+            involved_in_coord_bonds = []
             for estep in mech['steps']:
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
                 
@@ -139,8 +140,19 @@ def main(cfg: DictConfig):
                 next_atoms, next_bonds = step(atoms, bonds, meflows)
 
                 try:
-                    lhs = msm(construct_mols(atoms.values(), bonds.values()))
+                    lhs = construct_mols(atoms.values(), bonds.values())
                     rhs = msm(construct_mols(next_atoms.values(), next_bonds.values()))
+                    
+                    tmp = set()
+                    for mol in lhs:
+                        for atom in mol.GetAtoms():
+                            if atom.GetIntProp('coord_bond') == 1:
+                                tmp.add(atom.GetProp('mcsa_id'))
+
+                    involved_in_coord_bonds.append(tmp)
+
+                    lhs = msm(lhs)
+                
                 except Exception as e: # Catch errors in mechanism annotation
                     log.info(f"Error constructing mols for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
                     misannotated_mechanism = True
@@ -159,7 +171,7 @@ def main(cfg: DictConfig):
                 if len(remaining_overall_lhs) == 0:
                     break
 
-                for k, mol in enumerate(estep[0]):
+                for _, mol in enumerate(estep[0]):
                     for j, rct in enumerate(tmp_overall_lhs):
                         if j in remaining_overall_lhs:
                             if standardize_de_atom_map(rct) == standardize_de_atom_map(mol):
@@ -190,11 +202,16 @@ def main(cfg: DictConfig):
                             current_aidxs[k1][k2] = one_step_translation[v2]
 
                 # Involved
-                atoms_in_eflows = set(chain(*[chain(elt.from_, elt.to) for elt in eflow.values()])) # Collect atoms in eflows
-                atoms_in_eflows = [int(elt.removeprefix('a')) for elt in atoms_in_eflows]
+                atoms_in_eflows = set(
+                    chain(
+                        *[chain(elt.from_, elt.to) for elt in eflow.values()]
+                    )
+                ) # Collect atoms in eflows
+                atoms_involved_this_step = atoms_in_eflows.union(involved_in_coord_bonds[i]) # Add atoms involved in coordinate bonds
+                atoms_involved_this_step = [int(elt.removeprefix('a')) for elt in atoms_involved_this_step]
                 for k1, v1 in current_aidxs.items():
                     for k2, v2 in v1.items():
-                        if v2 in atoms_in_eflows:
+                        if v2 in atoms_involved_this_step:
                             involved_atoms[k1][k2] = True
 
                 # Transform
