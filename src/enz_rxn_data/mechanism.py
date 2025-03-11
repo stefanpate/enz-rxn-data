@@ -113,7 +113,7 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
 
     return atoms, bonds, meflows
 
-def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -> Iterable[Chem.Mol]:
+def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond], ignore_coord: bool = True) -> Iterable[Chem.Mol]:
     '''
     Constructs RDKit molecules from CML atoms and bonds.
     '''
@@ -148,10 +148,9 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
     for cbond in cml_bonds:
         bond_type = bond_types.get((cbond.order, cbond.convention))
 
-        # TODO: Delete
-        # if bond_type is None:
-        #     print(f"Ignoring orderless bond: {cbond.id} of convention {cbond.convention}")
-        #     continue
+        if ignore_coord and cbond.convention == 'cxn:coord':
+            print(f"Ignoring bond: {cbond.id} of convention {cbond.convention}")
+            continue
         
         from_, to = [mcsa2rdkit[atom_ref] for atom_ref in cbond.atom_refs]
 
@@ -182,7 +181,17 @@ def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Pa
     rhs = []
     for c in compounds:
         for _ in range(c['count']):
-            mol = Chem.MolFromMolFile(mol_path / f"{c['chebi_id']}.mol")
+
+            this_path = mol_path / f"{c['chebi_id']}.mol"
+            if not this_path.exists():
+                print(f"Path {this_path} does not exist.")
+                return tuple(), tuple()
+
+            mol = Chem.MolFromMolFile(this_path)
+            
+            if mol is None: # e.g. photon
+                break
+            
             Chem.RemoveStereochemistry(mol)
 
             if c['type'] == 'reactant':
@@ -192,7 +201,7 @@ def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Pa
 
     return tuple(lhs), tuple(rhs)
 
-def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflows: dict[str, CmlMEFlow]) -> tuple[dict[str, CmlAtom], dict[str, CmlBond]]:
+def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflows: dict[str, CmlMEFlow], ignore_coord: bool = True) -> tuple[dict[str, CmlAtom], dict[str, CmlBond]]:
     """
     Updates the bonds in the CML file based on the MEFlow elements.
     
@@ -204,7 +213,9 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
         Dictionary of CML bonds.
     cml_meflows: dict[str, CmlMEFlow]
         Dictionary of CML MEFlow elements.
-    
+    ignore_coord: bool
+        If True, ignore coordinate bonds.
+
     Returns
     -------
     Updated atoms and bonds
@@ -219,7 +230,10 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
             if cml_bonds.get(meflow.to):
                 cml_bonds[meflow.to].order += 1
             elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
-                cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
+                if ignore_coord:
+                    continue
+                else:
+                    cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
             else:
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
         
@@ -237,7 +251,10 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
                 cml_bonds[meflow.to].order += 1
                 cml_atoms[meflow.from_[0]].formal_charge += 1
             elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
-                cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
+                if ignore_coord:
+                    continue
+                else:
+                    cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
             else:
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
                 cml_atoms[meflow.from_[0]].formal_charge += 1
@@ -247,7 +264,7 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
 if __name__ == "__main__":
     import json
     # for i in range(1, 7):
-    file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/43_1_1.mrv'
+    file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/43_1_3.mrv'
     atoms, bonds, meflows = parse_mrv(file_path)
     mols = construct_mols(atoms.values(), bonds.values())
     next_atoms, next_bonds = step(atoms, bonds, meflows)
