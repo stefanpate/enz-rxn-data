@@ -272,7 +272,7 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
 if __name__ == "__main__":
     import json
     # for i in range(1, 7):
-    file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/43_1_3.mrv'
+    file_path = f'/home/stef/enz_rxn_data/data/raw/mcsa/mech_steps/102_2_4.mrv'
     atoms, bonds, meflows = parse_mrv(file_path)
     mols = construct_mols(atoms.values(), bonds.values())
     next_atoms, next_bonds = step(atoms, bonds, meflows)

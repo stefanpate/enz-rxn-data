@@ -88,10 +88,12 @@ def transform(lhs: list[Chem.Mol], rhs: list[Chem.Mol], imt_rcts: list[Chem.Mol]
     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=False)
     outputs = op.RunReactants(imt_rcts)
     
-    # TODO: Delete
-    # if len(outputs) == 0:
-    #     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
-    #     outputs = op.RunReactants(imt_rcts)
+    # TODO: Consider deleting. I don't think I hit this
+    # as much but there are still cases like mcsa reports coordinate bonds
+    # as single covalent bond, rdkit converts to dative automatically (e.g., entry 102)
+    if len(outputs) == 0:
+        op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
+        outputs = op.RunReactants(imt_rcts)
 
     smi_outputs = {tuple([Chem.MolToSmiles(mol) for mol in output]) for output in outputs}
 
@@ -112,7 +114,7 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms']
-    for entry_id in ['43']: #entries.keys():
+    for entry_id in entries.keys():
         reaction_entry = entries[entry_id]['reaction']
 
         for mech in reaction_entry['mechanisms']:
