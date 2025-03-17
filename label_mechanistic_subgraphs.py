@@ -118,6 +118,9 @@ def main(cfg: DictConfig):
         reaction_entry = entries[entry_id]['reaction']
 
         for mech in reaction_entry['mechanisms']:
+            if not mech['is_detailed']:
+                continue
+
             misannotated_mechanism = False
             tmp_overall_lhs, overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
             
