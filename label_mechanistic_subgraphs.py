@@ -29,7 +29,16 @@ def standardize_de_atom_map(mol: Chem.Mol) -> str:
 
 def translate(entering_rcts: list[Chem.Mol], prev_products: tuple[Chem.Mol], lhs: Iterable[Chem.Mol]) -> tuple[dict[str, str], tuple[Chem.Mol]]:
     '''
-    
+    Finds correspondence between atoms in entering_rcts & prev_products
+    with the left-hand side of the elementary step.
+
+    Args:
+        entering_rcts: List of reactants entering this elementary step
+        prev_products: Products from previous elementary step
+        lhs: Left-hand side of the elementary step
+    Returns:
+        one_step_translation: Maps old atom index to new atom index
+        imt_rcts: Intermediate reactants, ordered as they match lhs
     '''
     one_step_translation = {} # Maps old atom index to new atom index
     imt_rcts = [None for _ in range(len(lhs))] # Properly arranged intermediate reactants
@@ -83,6 +92,14 @@ def translate(entering_rcts: list[Chem.Mol], prev_products: tuple[Chem.Mol], lhs
 
 def transform(lhs: list[Chem.Mol], rhs: list[Chem.Mol], imt_rcts: list[Chem.Mol]) -> list[Chem.Mol]:
     '''
+    Creates an rdkit reaction from the elementary step and applies it to the intermediate reactants.
+
+    Args:
+        lhs: Left-hand side of the elementary step
+        rhs: Right-hand side of the elementary step
+        imt_rcts: Intermediate reactants, ordered as they match lhs
+    Returns:
+        outputs: Products from applying the elementary step to the intermediate reactants
     '''
     rule = ".".join([Chem.MolToSmarts(mol) for mol in lhs]) + ">>" + ".".join([Chem.MolToSmarts(mol) for mol in rhs])
     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=False)
@@ -108,15 +125,17 @@ log = logging.getLogger(__name__)
 def main(cfg: DictConfig):
     msm = lambda x : [Chem.MolFromSmiles(Chem.MolToSmiles(mol)) for mol in x] # TODO: Do I need this?
     is_hydrorgen = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
+    
+    # Load entries
     entries = {}
     for i in cfg.entry_batches:
         with open(Path(cfg.filepaths.raw_mcsa) / f"entries_{i}.json", "r") as f:
             entries = {**entries, **json.load(f)}
 
     mech_labeled_reactions = []
-    columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms']
-    for entry_id in entries.keys():
-        reaction_entry = entries[entry_id]['reaction']
+    columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms', "enzyme_name", "uniprot_id", "ec"]
+    for entry_id, entry in entries.items():
+        reaction_entry = entry['reaction']
 
         for mech in reaction_entry['mechanisms']:
             if not mech['is_detailed']:
@@ -134,7 +153,7 @@ def main(cfg: DictConfig):
             elementary_steps = []
             eflows = []
             involved_in_coord_bonds = []
-            for step_i, estep in enumerate(mech['steps']):
+            for estep in mech['steps']:
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
                 
                 if not file_path.exists():
@@ -170,7 +189,7 @@ def main(cfg: DictConfig):
             if misannotated_mechanism:
                 continue
 
-            # Reactants may enter at different elementary steps
+            # Find out where reactants enter the mechanism
             found_rcts = False
             for i_dir in range(2):
                 if found_rcts:
@@ -222,7 +241,7 @@ def main(cfg: DictConfig):
                         if v2 in one_step_translation:
                             current_aidxs[k1][k2] = one_step_translation[v2]
 
-                # Involved
+                # Label atoms involved in this step
                 atoms_in_eflows = set(
                     chain(
                         *[chain(elt.from_, elt.to) for elt in eflow.values()]
@@ -249,7 +268,7 @@ def main(cfg: DictConfig):
 
                 mech_atoms.append(tmp)
             
-            mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms])
+            mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms, entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
 
     # Save
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
