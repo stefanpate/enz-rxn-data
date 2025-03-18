@@ -107,6 +107,7 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="label_mechanistic_subgraphs")
 def main(cfg: DictConfig):
     msm = lambda x : [Chem.MolFromSmiles(Chem.MolToSmiles(mol)) for mol in x] # TODO: Do I need this?
+    is_hydrorgen = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
     entries = {}
     for i in cfg.entry_batches:
         with open(Path(cfg.filepaths.raw_mcsa) / f"entries_{i}.json", "r") as f:
@@ -122,9 +123,9 @@ def main(cfg: DictConfig):
                 continue
 
             misannotated_mechanism = False
-            tmp_overall_lhs, overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
+            tmp_overall_lhs, tmp_overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
             
-            if not tmp_overall_lhs or not overall_rhs:
+            if not tmp_overall_lhs or not tmp_overall_rhs:
                 log.info(f"Overall reaction not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
                 misannotated_mechanism = True
                 continue
@@ -133,7 +134,7 @@ def main(cfg: DictConfig):
             elementary_steps = []
             eflows = []
             involved_in_coord_bonds = []
-            for estep in mech['steps']:
+            for step_i, estep in enumerate(mech['steps']):
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
                 
                 if not file_path.exists():
@@ -170,21 +171,36 @@ def main(cfg: DictConfig):
                 continue
 
             # Reactants may enter at different elementary steps
-            entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
-            remaining_overall_lhs = {i for i in range(len(tmp_overall_lhs))}
-            for i, estep in reversed(list(enumerate(elementary_steps))):
-                if len(remaining_overall_lhs) == 0:
+            found_rcts = False
+            for i_dir in range(2):
+                if found_rcts:
                     break
 
-                for _, mol in enumerate(estep[0]):
-                    for j, rct in enumerate(tmp_overall_lhs):
-                        if j in remaining_overall_lhs:
-                            if standardize_de_atom_map(rct) == standardize_de_atom_map(mol):
-                                entry_points[i].append(deepcopy(mol))
-                                remaining_overall_lhs.remove(j)
-                                break
+                if i_dir == 1: # Second time, try reverse direction
+                    tmp = tmp_overall_lhs
+                    tmp_overall_lhs = tmp_overall_rhs
+                    tmp_overall_rhs = tmp
 
-            overall_lhs = list(chain(*entry_points.values()))
+                entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
+                remaining_overall_lhs = {i for i in range(len(tmp_overall_lhs))}
+                for i, estep in reversed(list(enumerate(elementary_steps))):
+                    if len(remaining_overall_lhs) == 0:
+                        break
+
+                    for _, mol in enumerate(estep[0]):
+                        for j, rct in enumerate(tmp_overall_lhs):
+                            if j in remaining_overall_lhs:
+                                if standardize_de_atom_map(rct) == standardize_de_atom_map(mol):
+                                    entry_points[i].append(deepcopy(mol))
+                                    remaining_overall_lhs.remove(j)
+                                    break
+
+                overall_lhs = list(chain(*entry_points.values()))
+                found_rcts = len(overall_lhs) >= sum(1 for m in tmp_overall_lhs if not is_hydrorgen(m)) # Forgive H ions
+
+            if not found_rcts: # Did not find reactants considering either direction
+                log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                continue
 
             involved_atoms = defaultdict(dict)
             current_aidxs = defaultdict(dict)
@@ -222,7 +238,8 @@ def main(cfg: DictConfig):
                 # Transform
                 imt_pdts = transform(estep[0], estep[1], imt_rcts)
 
-            smarts = ".".join([Chem.MolToSmiles(mol) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in overall_rhs])
+            # Append
+            smarts = ".".join([Chem.MolToSmiles(mol) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
             mech_atoms = []
             for i in sorted(involved_atoms.keys()):
                 tmp = []
@@ -234,6 +251,7 @@ def main(cfg: DictConfig):
             
             mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms])
 
+    # Save
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
     df.to_csv("mech_labeled_reactions.csv", index=False)
 
