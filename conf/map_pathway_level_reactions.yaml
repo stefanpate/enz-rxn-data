@@ -1,0 +1,9 @@
+defaults:
+  - filepaths: filepaths
+  - _self_
+
+hydra:
+  run:
+    dir: ${filepaths.interim_data}
+  job:
+    chdir: True
