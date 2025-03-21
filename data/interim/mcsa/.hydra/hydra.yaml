@@ -113,12 +113,12 @@ hydra:
     - hydra.mode=RUN
     task: []
   job:
-    name: map_mech_labeled_reactions
+    name: label_mechanistic_subgraphs
     chdir: true
     override_dirname: ''
     id: ???
     num: ???
-    config_name: map_mech_labeled_reactions
+    config_name: label_mechanistic_subgraphs
     env_set: {}
     env_copy: []
     config:
