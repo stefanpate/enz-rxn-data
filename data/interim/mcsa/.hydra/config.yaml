@@ -1,11 +1,19 @@
 filepaths:
-  repo: /home/stef/enz_rxn_data
-  data: ${.repo}/data
-  artifacts: ${.repo}/artifacts
+  data: /home/stef/enz_rxn_data/data
   raw_data: ${.data}/raw
-  interim_data: ${.data}/interim
   processed_data: ${.data}/processed
   raw_mcsa: ${.raw_data}/mcsa
   mcsa_mols: ${.raw_mcsa}/mols
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
-  rules: ${.artifacts}/rules
+entry_batches:
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
