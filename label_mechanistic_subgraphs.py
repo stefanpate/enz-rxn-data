@@ -10,7 +10,7 @@ from collections import defaultdict
 from rdkit import Chem
 from rdkit.Chem import rdChemReactions
 import pandas as pd
-from ergochem.standardize import standardize_mol
+from ergochemics.standardize import standardize_mol
 from enz_rxn_data.mechanism import (
     parse_mrv,
     construct_mols,
@@ -258,7 +258,9 @@ def main(cfg: DictConfig):
                 imt_pdts = transform(estep[0], estep[1], imt_rcts)
 
             # Append
-            smarts = ".".join([Chem.MolToSmiles(mol) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
+            # Note: ignoreAtomMapNumbers option required on lhs to canonicalize SMILES
+            # and indices in spite of the present use of atom map numbers to label mech atoms
+            smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
             mech_atoms = []
             for i in sorted(involved_atoms.keys()):
                 tmp = []
