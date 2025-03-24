@@ -110,7 +110,6 @@ def main(cfg: DictConfig):
     smarts = mech_rxns["smarts"]
     tasks = list(product(smarts, rules))
     ids = [elt[0] for elt in product(ids, rules)]
-    # tasks = tasks[:5000]
     
     # Map
     with ProcessPoolExecutor() as executor:
