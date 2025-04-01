@@ -2,8 +2,11 @@ defaults:
   - filepaths: filepaths
   - _self_
 
+src_file: decarbs.json
+input_path: ${filepaths.raw_data}/pathway/${.src_file}
+
 hydra:
   run:
-    dir: ${filepaths.interim_data}
+    dir: ${filepaths.interim_data}/pathway
   job:
     chdir: True

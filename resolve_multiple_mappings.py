@@ -1,5 +1,3 @@
-from rdkit import Chem
-import numpy as np
 from collections import Counter
 from omegaconf import DictConfig
 import hydra
@@ -9,7 +7,7 @@ from enz_rxn_data.mapping import does_break_cc
 
 @hydra.main(version_base=None, config_path="conf", config_name="resolve_multiple_mappings")
 def main(cfg: DictConfig):
-    full = pd.read_parquet(Path(cfg.filepaths.interim_data) / "mapped_reactions.parquet")
+    full = pd.read_parquet(Path(cfg.input_path))
     rule_cts = Counter(full["rule"])
 
     selected = []
@@ -28,8 +26,7 @@ def main(cfg: DictConfig):
     selected = pd.DataFrame(selected, columns=full.columns)
     selected.reset_index(drop=True, inplace=True)
 
-    selected.to_parquet("enzymatic_reactions.parquet")
-
+    selected.to_parquet(f"{cfg.src_file.split('_')[1]}")
 
 if __name__ == "__main__":
     main()

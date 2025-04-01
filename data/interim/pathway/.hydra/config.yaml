@@ -1,0 +1,13 @@
+filepaths:
+  repo: /home/stef/enz_rxn_data
+  data: ${.repo}/data
+  artifacts: ${.repo}/artifacts
+  raw_data: ${.data}/raw
+  interim_data: ${.data}/interim
+  processed_data: ${.data}/processed
+  raw_mcsa: ${.raw_data}/mcsa
+  mcsa_mols: ${.raw_mcsa}/mols
+  mcsa_mech_steps: ${.raw_mcsa}/mech_steps
+  rules: ${.artifacts}/rules
+src_file: decarbs.json
+input_path: ${.filepaths.raw_data}/pathway/${.src_file}

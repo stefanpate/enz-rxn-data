@@ -1,6 +1,6 @@
 hydra:
   run:
-    dir: ${filepaths.processed_data}/pathway_level
+    dir: ${filepaths.processed_data}/pathway
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -140,7 +140,7 @@ hydra:
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/stef/enz_rxn_data/data/processed/pathway_level
+    output_dir: /home/stef/enz_rxn_data/data/processed/pathway
     choices:
       filepaths: filepaths
       hydra/env: default

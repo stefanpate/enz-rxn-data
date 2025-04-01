@@ -1,6 +1,6 @@
 import hydra
 from omegaconf import DictConfig
-from ergochemics.mapping import operator_map_reaction
+from ergochemics.mapping import operator_map_reaction, rc_to_str
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 import json
@@ -12,7 +12,7 @@ from itertools import product
 def main(cfg: DictConfig):
 
     # Load reactions
-    with open(Path(cfg.filepaths.raw_data) / "sprhea/sprhea_240310_v3_mapped_no_subunits.json", 'r') as f: # TODO: Change to source direct from rhea + uniprot + etc
+    with open(Path(cfg.input_path), 'r') as f: # TODO: Change file type handling when change to new pull
         reactions = json.load(f)
 
     # Load rules
@@ -39,10 +39,10 @@ def main(cfg: DictConfig):
     rxns, rules = zip(*tasks)
     for id, _, rule, res in zip(ids, rxns, rules, results):
         if res.did_map:
-            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center])
+            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, rc_to_str(res.reaction_center)])
         
     df = pd.DataFrame(data, columns=columns)
-    df.to_parquet("mapped_reactions.parquet")
+    df.to_parquet(f"mapped_{Path(cfg.src_file).stem}.parquet")
 
 if __name__ == "__main__":
     main()
