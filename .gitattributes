@@ -1,2 +1,1 @@
 data/raw/ChEBI_lite_3star.sdf filter=lfs diff=lfs merge=lfs -text
-data/raw/sprhea/sprhea_240310_v3_mapped_no_subunits.json filter=lfs diff=lfs merge=lfs -text
