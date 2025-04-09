@@ -113,7 +113,7 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
 
     return atoms, bonds, meflows
 
-def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond], ignore_coord: bool = True) -> Iterable[Chem.Mol]:
+def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -> Iterable[Chem.Mol]:
     '''
     Constructs RDKit molecules from CML atoms and bonds.
     '''
@@ -145,13 +145,12 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond], i
         if catom.mrv_extra_label is not None:
             rw_mol.GetAtomWithIdx(aidx).SetProp('mrv_extra_label', catom.mrv_extra_label)
 
-        if ignore_coord: # Avoids downstream KeyError
-            rw_mol.GetAtomWithIdx(aidx).SetIntProp('coord_bond', 0)
+        rw_mol.GetAtomWithIdx(aidx).SetIntProp('coord_bond', 0) # Avoids downstream KeyError
 
     for cbond in cml_bonds:
         bond_type = bond_types.get((cbond.order, cbond.convention))
 
-        if ignore_coord and cbond.convention == 'cxn:coord':
+        if cbond.convention == 'cxn:coord':
             # print(f"Ignoring bond: {cbond.id} of convention {cbond.convention}")
 
             # Mark atoms involved in coordinate bonds
@@ -209,7 +208,7 @@ def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Pa
 
     return tuple(lhs), tuple(rhs)
 
-def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflows: dict[str, CmlMEFlow], ignore_coord: bool = True) -> tuple[dict[str, CmlAtom], dict[str, CmlBond]]:
+def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflows: dict[str, CmlMEFlow]) -> tuple[dict[str, CmlAtom], dict[str, CmlBond]]:
     """
     Updates the bonds in the CML file based on the MEFlow elements.
     
@@ -221,8 +220,6 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
         Dictionary of CML bonds.
     cml_meflows: dict[str, CmlMEFlow]
         Dictionary of CML MEFlow elements.
-    ignore_coord: bool
-        If True, ignore coordinate bonds.
 
     Returns
     -------
@@ -231,41 +228,42 @@ def step(cml_atoms: dict[str, CmlAtom], cml_bonds: dict[str, CmlBond], cml_meflo
     cml_atoms = {k: v.model_copy(deep=True) for k, v in cml_atoms.items()} # Defensive copy
     cml_bonds = {k: v.model_copy(deep=True) for k, v in cml_bonds.items()} # Defensive copy
     for meflow in cml_meflows.values():
+        sf = set(meflow.from_)
+        st = set(meflow.to)
 
         if len(meflow.from_) == 2 and len(meflow.to) == 2: # Bond to bond
             cml_bonds[meflow.from_].order -= 1
             
-            if cml_bonds.get(meflow.to):
+            if cml_bonds.get(meflow.to): # To bond exists
                 cml_bonds[meflow.to].order += 1
-            elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
-                if ignore_coord:
-                    continue
-                else:
-                    cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
-            else:
+            else: # New to bond
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
+
+            # Adjust formal charges
+            for aidx in sf - st:
+                cml_atoms[aidx].formal_charge += 1
+
+            for aidx in st - sf:
+                cml_atoms[aidx].formal_charge -= 1
         
         elif len(meflow.from_) == 2 and len(meflow.to) == 1: # Bond to lone pair
-            from_bond = cml_bonds[meflow.from_]
-            
-            if from_bond.convention is None: # Not coordinate bond
-                cml_atoms[meflow.to[0]].formal_charge -= 1
-            
+            cml_atoms[meflow.to[0]].formal_charge -= 1
+
+            for aidx in sf - st:
+                cml_atoms[aidx].formal_charge += 1
+        
             cml_bonds[meflow.from_].order -= 1
         
         elif len(meflow.from_) == 1 and len(meflow.to) == 2: # Lone pair to bond
             
-            if cml_bonds.get(meflow.to):
+            if cml_bonds.get(meflow.to): # Bond exists
                 cml_bonds[meflow.to].order += 1
-                cml_atoms[meflow.from_[0]].formal_charge += 1
-            elif cml_atoms[meflow.to[0]].element_type in metal_ligands or cml_atoms[meflow.to[1]].element_type in metal_ligands:
-                if ignore_coord:
-                    continue
-                else:
-                    cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1, convention='cxn:coord')
-            else:
+            else: # New bond
                 cml_bonds[meflow.to] = CmlBond(id='added', atom_refs=meflow.to, order=1)
-                cml_atoms[meflow.from_[0]].formal_charge += 1
+            
+            cml_atoms[meflow.from_[0]].formal_charge += 1
+            for aidx in st - sf:
+                cml_atoms[aidx].formal_charge -= 1
 
     return cml_atoms, {k: v for k, v in cml_bonds.items() if v.order is not None and v.order > 0}
 
