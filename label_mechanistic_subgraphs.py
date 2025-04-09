@@ -134,7 +134,7 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms', "enzyme_name", "uniprot_id", "ec"]
-    for entry_id, entry in {'50': entries['50']}.items(): #entries.items():
+    for entry_id, entry in entries.items():
         reaction_entry = entry['reaction']
 
         for mech in reaction_entry['mechanisms']:

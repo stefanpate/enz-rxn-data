@@ -102,8 +102,9 @@ def main(cfg: DictConfig):
     mech_rxns["smarts"] = mech_rxns["smarts"].apply(lambda x: _m_standardize_reaction(x)) # Standardize pre operator mapping to allow matching by smiles after
     
     # Load rules
-    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.tsv", sep="\t")
-    rules = set(rules["SMARTS"])
+    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.csv", sep=",")
+    rule_ids = rules["id"].tolist()
+    rules = rules["smarts"].tolist()
 
     chunksize = len(rules)
     ids = mech_rxns.index
@@ -121,12 +122,12 @@ def main(cfg: DictConfig):
         )
     
     # Compile results
-    columns = ["id", "smarts", "am_smarts", "rule", "reaction_center"] 
+    columns = ["id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
     data = []
     rxns, rules = zip(*tasks)
-    for id, _, rule, res in zip(ids, rxns, rules, results):
+    for id, _, rule, res, rule_id in zip(ids, rxns, rules, results, rule_ids):
         if res.did_map:
-            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center])
+            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center, rule_id])
 
     df = pd.DataFrame(data, columns=columns)
 
@@ -179,7 +180,7 @@ def main(cfg: DictConfig):
     compiled = compiled[
         [
             "entry_id", "mechanism_id", "smarts", "am_smarts", "rule", "reaction_center",
-            "mech_atoms", "enzyme_name", "uniprot_id", "ec"
+            "mech_atoms", "enzyme_name", "uniprot_id", "ec", "rule_id"
         ]
     ]
 
