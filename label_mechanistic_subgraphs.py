@@ -18,6 +18,23 @@ from enz_rxn_data.mechanism import (
     step
 )
 
+def is_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
+    if len(lhs) == 0 or len(rhs) == 0:
+        return False
+    
+    lhs_atoms = defaultdict(int)
+    rhs_atoms = defaultdict(int)
+
+    for mol in lhs:
+        for atom in mol.GetAtoms():
+            lhs_atoms[atom.GetSymbol()] += 1
+
+    for mol in rhs:
+        for atom in mol.GetAtoms():
+            rhs_atoms[atom.GetSymbol()] += 1
+
+    return lhs_atoms == rhs_atoms
+
 def standardize_de_atom_map(mol: Chem.Mol) -> str:
     mol = deepcopy(mol)
     for atom in mol.GetAtoms():
@@ -105,8 +122,7 @@ def transform(lhs: list[Chem.Mol], rhs: list[Chem.Mol], imt_rcts: list[Chem.Mol]
     op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=False)
     outputs = op.RunReactants(imt_rcts)
     
-    # TODO: Consider deleting. I don't think I hit this
-    # as much but there are still cases like mcsa reports coordinate bonds
+    # there are still cases that hit this like mcsa reports coordinate bonds
     # as single covalent bond, rdkit converts to dative automatically (e.g., entry 102)
     if len(outputs) == 0:
         op = rdChemReactions.ReactionFromSmarts(rule, useSmiles=True)
@@ -124,7 +140,7 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="label_mechanistic_subgraphs")
 def main(cfg: DictConfig):
     msm = lambda x : [Chem.MolFromSmiles(Chem.MolToSmiles(mol)) for mol in x] # TODO: Do I need this?
-    is_hydrorgen = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
+    is_hydrogen = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
     
     # Load entries
     entries = {}
@@ -132,27 +148,65 @@ def main(cfg: DictConfig):
         with open(Path(cfg.filepaths.raw_mcsa) / f"entries_{i}.json", "r") as f:
             entries = {**entries, **json.load(f)}
 
+    # Gather alternative overall reactions
+    rhea_rxn_smarts = pd.read_csv(Path(cfg.filepaths.raw_data) / "pathway" / "rhea-reaction-smiles.tsv", sep="\t", header=None)
+    rhea_ec = pd.read_csv(Path(cfg.filepaths.raw_data) / "pathway" / "rhea2ec.tsv", sep="\t")
+    rhea_directions = pd.read_csv(Path(cfg.filepaths.raw_data) / "pathway" / "rhea-directions.tsv", sep="\t")
+    rhea_rxn_smarts.columns = ['ID', 'SMARTS']
+    rhea_ec.columns = ["RHEA_ID", "DIRECTION", "MASTER_ID", "EC"]
+    rhea_directions.columns = ["RHEA_ID", "RHEA_ID_LR", "RHEA_ID_RL", "RHEA_ID_BI"]
+    rhea = rhea_ec.join(other=rhea_directions.set_index("RHEA_ID"), on="RHEA_ID", how="inner")
+    rhea = rhea.join(other=rhea_rxn_smarts.set_index("ID"), on="RHEA_ID_LR", how="left")
+    rhea = rhea.join(other=rhea_rxn_smarts.set_index("ID"), on="RHEA_ID_RL", how="left", rsuffix="_RL")
+    
+    alt_rxns = defaultdict(set)
+    for _, row in rhea.iterrows():
+        for smarts in [row["SMARTS"], row["SMARTS_RL"]]:
+            smarts = row["SMARTS"]
+            
+            if not pd.isna(smarts):
+                alt_rxns[row["EC"]].add(smarts)
+
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms', "enzyme_name", "uniprot_id", "ec"]
     for entry_id, entry in entries.items():
         reaction_entry = entry['reaction']
+        tmp_overall_lhs, tmp_overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
+        tmp_overall_lhs = [elt for elt in tmp_overall_lhs if not is_hydrogen(elt)] # Forgive H ions
+        tmp_overall_rhs = [elt for elt in tmp_overall_rhs if not is_hydrogen(elt)]
+        
+
+        # Check if reactions balanced
+        if is_balanced(tmp_overall_lhs, tmp_overall_rhs):
+            alternates = [(tmp_overall_lhs, tmp_overall_rhs)]
+        else: # Check rhea for alternates
+            alternates = []
+            for sma in alt_rxns[reaction_entry['ec']]:
+                tmp_lhs, tmp_rhs = [[Chem.MolFromSmiles(smi) for smi in side.split(".")] for side in sma.split(">>")]
+                tmp_lhs = [elt for elt in tmp_lhs if not is_hydrogen(elt)]
+                tmp_rhs = [elt for elt in tmp_rhs if not is_hydrogen(elt)]
+                if is_balanced(tmp_lhs, tmp_rhs):
+                    alternates.append((tmp_lhs, tmp_rhs))
+        
+        if len(alternates) == 0:
+            log.info(f"No balanced reaction found for entry {entry_id}")
+            continue
+        
+        # Add the other direction
+        rev = []
+        for tmp_lhs, tmp_rhs in alternates:
+            rev.append((tmp_rhs, tmp_lhs))
+        alternates.extend(rev)
 
         for mech in reaction_entry['mechanisms']:
             if not mech['is_detailed']:
-                continue
-
-            misannotated_mechanism = False
-            tmp_overall_lhs, tmp_overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
-            
-            if not tmp_overall_lhs or not tmp_overall_rhs:
-                log.info(f"Overall reaction not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
-                misannotated_mechanism = True
                 continue
 
             # Assemble steps and electron flows
             elementary_steps = []
             eflows = []
             involved_in_coord_bonds = []
+            misannotated_mechanism = False
             for estep in mech['steps']:
                 file_path = Path(cfg.filepaths.raw_mcsa) / "mech_steps" / f"{entry_id}_{mech['mechanism_id']}_{estep['step_id']}.mrv"
                 
@@ -190,15 +244,7 @@ def main(cfg: DictConfig):
                 continue
 
             # Find out where reactants enter the mechanism
-            found_rcts = False
-            for i_dir in range(2):
-                if found_rcts:
-                    break
-
-                if i_dir == 1: # Second time, try reverse direction
-                    tmp = tmp_overall_lhs
-                    tmp_overall_lhs = tmp_overall_rhs
-                    tmp_overall_rhs = tmp
+            for tmp_overall_lhs, tmp_overall_rhs in alternates:
 
                 entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
                 remaining_overall_lhs = {i for i in range(len(tmp_overall_lhs))}
@@ -215,62 +261,65 @@ def main(cfg: DictConfig):
                                     break
 
                 overall_lhs = list(chain(*entry_points.values()))
-                found_rcts = len(overall_lhs) >= sum(1 for m in tmp_overall_lhs if not is_hydrorgen(m)) # Forgive H ions
+                found_rcts = len(overall_lhs) >= sum(1 for m in tmp_overall_lhs)
 
-            if not found_rcts: # Did not find reactants considering either direction
-                log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
-                continue
+                if not found_rcts: # Did not find reactants considering either direction
+                    log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    continue
 
-            involved_atoms = defaultdict(dict)
-            current_aidxs = defaultdict(dict)
-            for i, mol in enumerate(overall_lhs):
-                for atom in mol.GetAtoms():
-                    involved_atoms[i][atom.GetIdx()] = False
-                    atom.SetProp('pre_mech', f"pre_{i}_{atom.GetIdx()}")
-                    current_aidxs[i][atom.GetIdx()] = atom.GetProp('pre_mech')
+                involved_atoms = defaultdict(dict)
+                current_aidxs = defaultdict(dict)
+                for i, mol in enumerate(overall_lhs):
+                    for atom in mol.GetAtoms():
+                        involved_atoms[i][atom.GetIdx()] = False
+                        atom.SetProp('pre_mech', f"pre_{i}_{atom.GetIdx()}")
+                        current_aidxs[i][atom.GetIdx()] = atom.GetProp('pre_mech')
 
-            # Main loop
-            imt_pdts = []
-            for i, (estep, eflow) in enumerate(list(zip(elementary_steps, eflows))):
-                entering_rcts = entry_points.get(i, [])
+                # Main loop
+                imt_pdts = []
+                for i, (estep, eflow) in enumerate(list(zip(elementary_steps, eflows))):
+                    entering_rcts = entry_points.get(i, [])
 
-                # Translate
-                one_step_translation, imt_rcts = translate(entering_rcts, imt_pdts, estep[0])
-                for k1, v1 in current_aidxs.items():
-                    for k2, v2 in v1.items():
-                        if v2 in one_step_translation:
-                            current_aidxs[k1][k2] = one_step_translation[v2]
+                    # Translate
+                    one_step_translation, imt_rcts = translate(entering_rcts, imt_pdts, estep[0])
+                    for k1, v1 in current_aidxs.items():
+                        for k2, v2 in v1.items():
+                            if v2 in one_step_translation:
+                                current_aidxs[k1][k2] = one_step_translation[v2]
 
-                # Label atoms involved in this step
-                atoms_in_eflows = set(
-                    chain(
-                        *[chain(elt.from_, elt.to) for elt in eflow.values()]
-                    )
-                ) # Collect atoms in eflows
-                atoms_involved_this_step = atoms_in_eflows.union(involved_in_coord_bonds[i]) # Add atoms involved in coordinate bonds
-                atoms_involved_this_step = [int(elt.removeprefix('a')) for elt in atoms_involved_this_step]
-                for k1, v1 in current_aidxs.items():
-                    for k2, v2 in v1.items():
-                        if v2 in atoms_involved_this_step:
-                            involved_atoms[k1][k2] = True
+                    # Label atoms involved in this step
+                    atoms_in_eflows = set(
+                        chain(
+                            *[chain(elt.from_, elt.to) for elt in eflow.values()]
+                        )
+                    ) # Collect atoms in eflows
+                    atoms_involved_this_step = atoms_in_eflows.union(involved_in_coord_bonds[i]) # Add atoms involved in coordinate bonds
+                    atoms_involved_this_step = [int(elt.removeprefix('a')) for elt in atoms_involved_this_step]
+                    for k1, v1 in current_aidxs.items():
+                        for k2, v2 in v1.items():
+                            if v2 in atoms_involved_this_step:
+                                involved_atoms[k1][k2] = True
 
-                # Transform
-                imt_pdts = transform(estep[0], estep[1], imt_rcts)
+                    # Transform
+                    imt_pdts = transform(estep[0], estep[1], imt_rcts)
 
-            # Append
-            # Note: ignoreAtomMapNumbers option required on lhs to canonicalize SMILES
-            # and indices in spite of the present use of atom map numbers to label mech atoms
-            smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
-            mech_atoms = []
-            for i in sorted(involved_atoms.keys()):
-                tmp = []
-                for j in sorted(involved_atoms[i].keys()):
-                    if involved_atoms[i][j]:
-                        tmp.append(overall_lhs[i].GetAtomWithIdx(j).GetAtomMapNum())
+                # Append
+                # Note: ignoreAtomMapNumbers option required on lhs to canonicalize SMILES
+                # and indices in spite of the present use of atom map numbers to label mech atoms
+                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
+                mech_atoms = []
+                for i in sorted(involved_atoms.keys()):
+                    tmp = []
+                    for j in sorted(involved_atoms[i].keys()):
+                        if involved_atoms[i][j]:
+                            tmp.append(overall_lhs[i].GetAtomWithIdx(j).GetAtomMapNum())
 
-                mech_atoms.append(tmp)
-            
-            mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms, entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
+                    mech_atoms.append(tmp)
+
+                if all(len(tmp) == 0 for tmp in mech_atoms): # This would be true if you were looking at wrong direction of reaction
+                    continue
+                
+                mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms, entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
 
     # Save
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
