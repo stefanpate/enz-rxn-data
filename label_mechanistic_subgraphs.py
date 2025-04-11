@@ -11,6 +11,7 @@ from rdkit import Chem
 from rdkit.Chem import rdChemReactions
 import pandas as pd
 from ergochemics.standardize import standardize_mol
+from ergochemics.mapping import rc_to_str
 from enz_rxn_data.mechanism import (
     parse_mrv,
     construct_mols,
@@ -319,7 +320,7 @@ def main(cfg: DictConfig):
                 if all(len(tmp) == 0 for tmp in mech_atoms): # This would be true if you were looking at wrong direction of reaction
                     continue
                 
-                mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, mech_atoms, entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
+                mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, rc_to_str([mech_atoms, [[]]]), entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
 
     # Save
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)

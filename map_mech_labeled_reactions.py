@@ -1,6 +1,5 @@
 import hydra
 from omegaconf import DictConfig
-from ergochemics.mapping import operator_map_reaction, _m_standardize_reaction
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from tqdm import tqdm
@@ -9,11 +8,16 @@ from itertools import product, permutations
 from collections import Counter
 from typing import Iterable
 from rdkit import Chem
-import ast
 from enz_rxn_data.mapping import does_break_cc
 import logging
+from ergochemics.mapping import (
+    operator_map_reaction,
+    _m_standardize_reaction,
+    rc_to_str,
+    rc_to_nest
+)
 
-def clean_up_mcsa(ams_for_rcts: Iterable[Iterable[int]], rxn: str) -> tuple[list[list[int]], str]:
+def clean_up_mcsa(mech_atoms: Iterable[Iterable[Iterable[int]]], rxn: str) -> tuple[list[list[int]], str]:
     '''
     De-atom map, remove ions, translate mech atoms from am nums to atom idxs
     '''
@@ -29,9 +33,10 @@ def clean_up_mcsa(ams_for_rcts: Iterable[Iterable[int]], rxn: str) -> tuple[list
     rhs = rxn.split(">>")[1].split('.')
     lhs = [Chem.MolFromSmiles(x) for x in lhs]
     rhs = [Chem.MolFromSmiles(x) for x in rhs]
+    lhs_mech_atoms = mech_atoms[0]
     rct_idxs = []
     de_am_smiles = []
-    for mol, ams in zip(lhs, ams_for_rcts):
+    for mol, ams in zip(lhs, lhs_mech_atoms):
         
         # Exclude ions from lhs and rct_idxs
         if mol.GetNumAtoms() == 1 and mol.GetAtomWithIdx(0).GetSymbol() in to_rm:
@@ -87,7 +92,7 @@ def main(cfg: DictConfig):
         filepath_or_buffer=Path(cfg.filepaths.interim_data) / "mcsa" / "mech_labeled_reactions.csv",
         sep=","
     )
-    mech_rxns["mech_atoms"] = mech_rxns["mech_atoms"].apply(lambda x: ast.literal_eval(x))
+    mech_rxns["mech_atoms"] = mech_rxns["mech_atoms"].apply(lambda x: rc_to_nest(x))
 
     # Remove atom map numbers & translate mech_atoms from am nums to atom idxs
     mech_atom_idxs = []
@@ -102,38 +107,34 @@ def main(cfg: DictConfig):
     mech_rxns["smarts"] = mech_rxns["smarts"].apply(lambda x: _m_standardize_reaction(x)) # Standardize pre operator mapping to allow matching by smiles after
     
     # Load rules
-    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.csv", sep=",")
-    rule_ids = rules["id"].tolist()
-    rules = rules["smarts"].tolist()
-
+    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.csv", sep=",", index_col=0)
     chunksize = len(rules)
-    ids = mech_rxns.index
-    smarts = mech_rxns["smarts"]
-    tasks = list(product(smarts, rules))
-    ids = [elt[0] for elt in product(ids, rules)]
+
+    rxn_rule_cart_prod = product(mech_rxns.index, rules.index)
+    tasks = [(rxn_id, mech_rxns.loc[rxn_id, "smarts"], rule_id, rules.loc[rule_id, "smarts"]) for rxn_id, rule_id in rxn_rule_cart_prod]
+    rxn_ids, rxns, rule_ids, rules = zip(*tasks)
     
     # Map
     with ProcessPoolExecutor() as executor:
         results = list(
             tqdm(
-                executor.map(operator_map_reaction, *zip(*tasks), chunksize=chunksize),
+                executor.map(operator_map_reaction, rxns, rules, chunksize=chunksize),
                 total=len(tasks)
             )
         )
     
     # Compile results
-    columns = ["id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
+    columns = ["rxn_id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
     data = []
-    rxns, rules = zip(*tasks)
-    for id, _, rule, res, rule_id in zip(ids, rxns, rules, results, rule_ids):
+    for rxn_id, _, rule, res, rule_id in zip(rxn_ids, rxns, rules, results, rule_ids):
         if res.did_map:
-            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center, rule_id])
+            data.append([rxn_id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center, rule_id])
 
     df = pd.DataFrame(data, columns=columns)
 
     # Resolved multiple mappings
     selected = []
-    for name, group in df.groupby("id"):
+    for name, group in df.groupby("rxn_id"):
         if len(group) == 1:
             selected.append(group.iloc[0])
         else:
@@ -151,26 +152,26 @@ def main(cfg: DictConfig):
     bad_sidxs = []
     bad_ids = []
     for sidx, row in selected.iterrows():
-        id = row['id']
+        rxn_id = row['rxn_id']
         post = row["smarts"]
-        pre = mech_rxns.loc[id, "smarts"]
+        pre = mech_rxns.loc[rxn_id, "smarts"]
         try:
             perm_idx = match_rcts_post_mapping(pre, post)
-            aligned = [mech_rxns.iloc[id]["mech_atoms"][i] for i in perm_idx]
-            mech_rxns.at[id, 'mech_atoms'] = aligned    
+            aligned = [mech_rxns.loc[rxn_id]["mech_atoms"][i] for i in perm_idx]
+            mech_rxns.at[rxn_id, 'mech_atoms'] = aligned
         except ValueError as e:
-            log.info(f"Error matching reactants for {id}: {e} with smarts {pre} and {post}")
+            log.info(f"Error matching reactants for {rxn_id}: {e} with smarts {pre} and {post}")
             bad_sidxs.append(sidx)
-            bad_ids.append(id)
+            bad_ids.append(rxn_id)
 
     mech_rxns.drop(labels=bad_ids, inplace=True)
     selected.drop(labels=bad_sidxs, inplace=True)
-    selected.set_index("id", inplace=True)
+    selected.set_index("rxn_id", inplace=True)
     
     compiled = pd.concat(
         [
             mech_rxns.loc[:, [col for col in mech_rxns.columns if col != "smarts"]],
-            selected.loc[:, [col for col in selected.columns if col != 'id']]
+            selected.loc[:, [col for col in selected.columns if col != 'rxn_id']]
         ],
         axis=1,
         join="inner"
@@ -183,6 +184,9 @@ def main(cfg: DictConfig):
             "mech_atoms", "enzyme_name", "uniprot_id", "ec", "rule_id"
         ]
     ]
+
+    compiled["mech_atoms"] = compiled["mech_atoms"].apply(lambda x: rc_to_str([x, [[]]]))
+    compiled["reaction_center"] = compiled["reaction_center"].apply(lambda x: rc_to_str(x))
 
     compiled.to_parquet("mapped_mech_labeled_reactions.parquet") # Save
 
