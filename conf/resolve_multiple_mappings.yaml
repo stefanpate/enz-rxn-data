@@ -2,7 +2,7 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-src_file: mapped_decarbs.parquet
+src_file: mappings_decarbs_x_min_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
 
 hydra:

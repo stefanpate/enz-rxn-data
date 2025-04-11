@@ -12,37 +12,35 @@ from itertools import product
 def main(cfg: DictConfig):
 
     # Load reactions
-    with open(Path(cfg.input_path), 'r') as f: # TODO: Change file type handling when change to new pull
+    with open(Path(cfg.rxn_path), 'r') as f: # TODO: Change file type handling when change to new pull
         reactions = json.load(f)
 
     # Load rules
-    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.tsv", sep="\t")
-    rules = set(rules["SMARTS"])
-
+    rules = pd.read_csv(Path(cfg.rule_path), sep=",", index_col=0)
     chunksize = len(rules)
-    ids, smarts = zip(*[(k, v['smarts']) for k, v in reactions.items()])
-    tasks = list(product(smarts, rules))
-    ids = [elt[0] for elt in product(ids, rules)]
+
+    rxn_rule_cart_prod = product(reactions.keys(), rules.index)
+    tasks = [(k, reactions[k]['smarts'], rule_id, rules.loc[rule_id, "smarts"]) for k, rule_id in rxn_rule_cart_prod]
+    rxn_ids, rxns, rule_ids, rules = zip(*tasks)
     
     # Map
     with ProcessPoolExecutor() as executor:
         results = list(
             tqdm(
-                executor.map(operator_map_reaction, *zip(*tasks), chunksize=chunksize),
+                executor.map(operator_map_reaction, rxns, rules, chunksize=chunksize),
                 total=len(tasks)
             )
         )
     
     # Save
-    columns = ["id", "smarts", "am_smarts", "rule", "reaction_center"] 
+    columns = ["rxn_id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
     data = []
-    rxns, rules = zip(*tasks)
-    for id, _, rule, res in zip(ids, rxns, rules, results):
+    for id, rule, res, rule_id in zip(rxn_ids, rules, results, rule_ids):
         if res.did_map:
-            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, rc_to_str(res.reaction_center)])
+            data.append([id, res.aligned_smarts, res.atom_mapped_smarts, rule, rc_to_str(res.reaction_center), rule_id])
         
     df = pd.DataFrame(data, columns=columns)
-    df.to_parquet(f"mapped_{Path(cfg.src_file).stem}.parquet")
+    df.to_parquet(f"mappings_{Path(cfg.rxn_file).stem}_x_{Path(cfg.rule_file).stem}.parquet")
 
 if __name__ == "__main__":
     main()

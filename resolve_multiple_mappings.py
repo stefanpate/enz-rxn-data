@@ -11,7 +11,7 @@ def main(cfg: DictConfig):
     rule_cts = Counter(full["rule"])
 
     selected = []
-    for name, group in full.groupby("id"):
+    for name, group in full.groupby("rxn_id"):
         if len(group) == 1:
             selected.append(group.iloc[0])
         else:
@@ -26,7 +26,7 @@ def main(cfg: DictConfig):
     selected = pd.DataFrame(selected, columns=full.columns)
     selected.reset_index(drop=True, inplace=True)
 
-    selected.to_parquet(f"{cfg.src_file.split('_')[1]}")
+    selected.to_parquet(f"mapped_{"_".join(cfg.src_file.split('_')[1:])}")
 
 if __name__ == "__main__":
     main()

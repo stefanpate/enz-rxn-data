@@ -2,8 +2,10 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-src_file: decarbs.json
-input_path: ${filepaths.raw_data}/pathway/${.src_file}
+rxn_file: decarbs.json
+rule_file: min_rules.csv
+rxn_path: ${filepaths.raw_data}/pathway/${.rxn_file}
+rule_path: ${filepaths.rules}/${.rule_file}
 
 hydra:
   run:

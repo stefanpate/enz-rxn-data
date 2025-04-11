@@ -84,7 +84,7 @@ log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="map_mech_labeled_reactions")
 def main(cfg: DictConfig):
-    full = pd.read_parquet(Path(cfg.filepaths.interim_data) / "mapped_reactions.parquet")
+    full = pd.read_parquet(Path(cfg.filepaths.interim_data) / "mapped_reactions.parquet") # TODO: Name of mapped known reactions will change. Must also document that they have to be mapped before this file is run
     rule_cts = Counter(full["rule"])
 
     # Load reactions
