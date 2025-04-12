@@ -1,0 +1,11 @@
+defaults:
+  - filepaths: filepaths
+  - _self_
+
+src_file: ni_imt_rules.tsv
+
+hydra:
+  run:
+    dir: ${filepaths.rules}
+  job:
+    chdir: True

@@ -9,3 +9,4 @@ filepaths:
   mcsa_mols: ${.raw_mcsa}/mols
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
+src_file: ni_min_rules.tsv

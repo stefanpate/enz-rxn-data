@@ -111,14 +111,15 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task: []
+    task:
+    - src_file=ni_min_rules.tsv
   job:
-    name: uniquify_min_rules
+    name: uniquify_ni_rules
     chdir: true
-    override_dirname: ''
+    override_dirname: src_file=ni_min_rules.tsv
     id: ???
     num: ???
-    config_name: uniquify_min_rules
+    config_name: uniquify_ni_rules
     env_set: {}
     env_copy: []
     config:

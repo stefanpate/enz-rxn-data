@@ -111,11 +111,12 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task: []
+    task:
+    - rule_file=imt_rules.csv
   job:
     name: map_pathway_level_reactions
     chdir: true
-    override_dirname: ''
+    override_dirname: rule_file=imt_rules.csv
     id: ???
     num: ???
     config_name: map_pathway_level_reactions
