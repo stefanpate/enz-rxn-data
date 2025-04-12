@@ -4,12 +4,13 @@ This repository contains code to download and format enzymatic reaction data fro
 
 ## Install
 
-Download repo via git.
-
-Create virtual environment and install dependencies.
-
 ```
+curl -LsSf https://astral.sh/uv/install.sh | sh # install uv
+uv python install 3.13 # Install uv
+git clone git@github.com:stefanpate/enz-rxn-data.git
+cd enz-rxn-data
 uv sync
+# Set conf/filepaths/filepaths.yaml field "repo" to repo location
 ```
 
 ## Usage
