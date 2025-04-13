@@ -9,5 +9,5 @@ filepaths:
   mcsa_mols: ${.raw_mcsa}/mols
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
-src_file: mappings_decarbs_x_imt_rules.parquet
+src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_imt_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
