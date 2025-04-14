@@ -1,6 +1,6 @@
 hydra:
   run:
-    dir: ${filepaths.processed_data}/mcsa
+    dir: ${filepaths.processed_data}/mcsa/mech_labeled_reactions.csv
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -140,7 +140,7 @@ hydra:
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/stef/enz_rxn_data/data/processed/mcsa
+    output_dir: /home/stef/enz_rxn_data/data/processed/mcsa/mech_labeled_reactions.csv
     choices:
       filepaths: filepaths
       hydra/env: default

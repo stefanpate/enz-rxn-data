@@ -9,3 +9,5 @@ filepaths:
   mcsa_mols: ${.raw_mcsa}/mols
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
+full_rxns: ${.filepaths.processed_data}/pathway/mapped_sprhea_240310_v3_mapped_no_subunits_x_min_rules.parquet
+mech_rxns: ${.filepaths.interim_data}/mcsa/mech_labeled_reactions.csv

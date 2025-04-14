@@ -84,14 +84,11 @@ log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="map_mech_labeled_reactions")
 def main(cfg: DictConfig):
-    full = pd.read_parquet(Path(cfg.filepaths.interim_data) / "mapped_reactions.parquet") # TODO: Name of mapped known reactions will change. Must also document that they have to be mapped before this file is run
+    full = pd.read_parquet(Path(cfg.full_rxns)) # TODO: document that full rxns have to be mapped before this file is run
     rule_cts = Counter(full["rule"])
 
     # Load reactions
-    mech_rxns = pd.read_csv(
-        filepath_or_buffer=Path(cfg.filepaths.interim_data) / "mcsa" / "mech_labeled_reactions.csv",
-        sep=","
-    )
+    mech_rxns = pd.read_csv(filepath_or_buffer=Path(cfg.mech_rxns), sep=",")
     mech_rxns["mech_atoms"] = mech_rxns["mech_atoms"].apply(lambda x: rc_to_nest(x))
 
     # Remove atom map numbers & translate mech_atoms from am nums to atom idxs
