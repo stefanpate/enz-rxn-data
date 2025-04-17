@@ -364,16 +364,17 @@ def main(cfg: DictConfig):
                         rhs_aidx = rhs_am_aidx[pdt_idx][rhs_old_am]
                         overall_rhs[pdt_idx].GetAtomWithIdx(rhs_aidx).SetAtomMapNum(am)
                         atom.SetAtomMapNum(am)
-                        mech_atoms[i].append(am)
+
+                        if involved_atoms[key]:
+                            mech_atoms[i].append(am)
+
                         am += 1
 
-                # Append
-                # Note: ignoreAtomMapNumbers option required on lhs to canonicalize SMILES
-                # and indices in spite of the present use of atom map numbers to label mech atoms
-                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in overall_rhs])
                 if all(len(elt) == 0 for elt in mech_atoms): # This would be true if you were looking at wrong direction of reaction
                     continue
-                
+
+                # ignoreAtomMapNumbers option required on lhs to canonicalize SMILES in a way that doesn't depend on atom map numbers
+                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in overall_rhs])
                 mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, rc_to_str([mech_atoms, [[]]]), entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
 
     # Save

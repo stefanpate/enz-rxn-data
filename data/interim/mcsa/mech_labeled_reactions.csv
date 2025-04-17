@@ -1,2 +1,2 @@
 entry_id,mechanism_id,smarts,mech_atoms,enzyme_name,uniprot_id,ec
-722,1,[CH3:6][C:4](=[O:5])[C:1](=[O:3])[O-:2].[CH3:10][C:9](=[O:11])[C:7](=[O:12])[O-:8]>>[C:7](=[O:8])=[O:12].[C:1]([O-:2])(=[O:3])[C:4]([OH:5])([CH3:6])[C:9]([CH3:10])=[O:11],"62,63;28,29,30,33>>",acetolactate synthase (catabolic),P27696,2.2.1.6
+722,1,[CH3:6][C:4](=[O:5])[C:1](=[O:3])[O-:2].[CH3:10][C:9](=[O:11])[C:7](=[O:12])[O-:8]>>[C:7](=[O:8])=[O:12].[C:1]([O-:2])(=[O:3])[C:4]([OH:5])([CH3:6])[C:9]([CH3:10])=[O:11],"4,5;7,8,9,11>>",acetolactate synthase (catabolic),P27696,2.2.1.6
