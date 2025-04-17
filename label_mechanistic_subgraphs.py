@@ -170,7 +170,7 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms', "enzyme_name", "uniprot_id", "ec"]
-    for entry_id, entry in entries.items():
+    for entry_id, entry in {'722': entries['722']}.items():#entries.items():
         reaction_entry = entry['reaction']
         tmp_overall_lhs, tmp_overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
         tmp_overall_lhs = [elt for elt in tmp_overall_lhs if not is_hydrogen(elt)] # Forgive H ions
@@ -244,49 +244,93 @@ def main(cfg: DictConfig):
             if misannotated_mechanism:
                 continue
 
-            # Find out where reactants enter the mechanism
             for tmp_overall_lhs, tmp_overall_rhs in alternates:
 
-                entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
-                remaining_overall_lhs = {i for i in range(len(tmp_overall_lhs))}
+                # Find out where reactants enter the mechanism & where products are formed in mechanism
+                rct_entry_points = defaultdict(list) # Maps estep -> list[entering rcts]
+                pdt_formation_points = defaultdict(list) # Maps estep -> list[forming pdts]
+                
+                # Backward to find rcts "latest" occurrence
+                remaining_rcts = {i for i in range(len(tmp_overall_lhs))}
                 for i, estep in reversed(list(enumerate(elementary_steps))):
-                    if len(remaining_overall_lhs) == 0:
+                    if len(remaining_rcts) == 0:
                         break
 
                     for _, mol in enumerate(estep[0]):
                         for j, rct in enumerate(tmp_overall_lhs):
-                            if j in remaining_overall_lhs:
+                            if j in remaining_rcts:
                                 if standardize_de_atom_map(rct) == standardize_de_atom_map(mol):
-                                    entry_points[i].append(deepcopy(mol))
-                                    remaining_overall_lhs.remove(j)
+                                    rct_entry_points[i].append(deepcopy(mol))
+                                    remaining_rcts.remove(j)
                                     break
 
-                overall_lhs = list(chain(*entry_points.values()))
-                found_rcts = len(overall_lhs) >= sum(1 for m in tmp_overall_lhs)
+                # Forward to find pdts "earliest" occurrence
+                remaining_pdts = {i for i in range(len(tmp_overall_rhs))}
+                for i, estep in enumerate(elementary_steps):
+                    if len(remaining_pdts) == 0:
+                        break
 
-                if not found_rcts: # Did not find reactants considering either direction
-                    log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    for _, mol in enumerate(estep[1]):
+                        for j, pdt in enumerate(tmp_overall_rhs):
+                            if j in remaining_pdts:
+                                if standardize_de_atom_map(pdt) == standardize_de_atom_map(mol):
+                                    pdt_formation_points[i].append(deepcopy(mol))
+                                    remaining_pdts.remove(j)
+                                    break
+
+                # Check if found all reactants and products
+                overall_lhs = list(chain(*rct_entry_points.values()))
+                overall_rhs = list(chain(*pdt_formation_points.values()))
+                found_rcts = len(overall_lhs) >= sum(1 for m in tmp_overall_lhs)
+                found_pdts = len(overall_rhs) >= sum(1 for m in tmp_overall_rhs)
+
+                if not found_rcts or not found_pdts:
+                    if not found_rcts:
+                        log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    if not found_pdts:
+                        log.info(f"Products not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
                     continue
 
-                involved_atoms = defaultdict(dict)
-                current_aidxs = defaultdict(dict)
+
+                start2end = {}
+                start2current = {}
+                current2start = {}
+                involved_atoms = {}
                 for i, mol in enumerate(overall_lhs):
                     for atom in mol.GetAtoms():
-                        involved_atoms[i][atom.GetIdx()] = False
-                        atom.SetProp('pre_mech', f"pre_{i}_{atom.GetIdx()}")
-                        current_aidxs[i][atom.GetIdx()] = atom.GetProp('pre_mech')
+                        pre_mech_idx = f"{i}_{atom.GetAtomMapNum()}"
+                        atom.SetProp('pre_mech', pre_mech_idx)
+                        start2current[pre_mech_idx] = pre_mech_idx
+                        current2start[pre_mech_idx] = pre_mech_idx
+                        start2end[pre_mech_idx] = None
+                        involved_atoms[pre_mech_idx] = False
+
+                for i, mol in enumerate(overall_rhs):
+                    for atom in mol.GetAtoms():
+                        atom.SetProp('post_mech', f"{i}_{atom.GetAtomMapNum()}")
 
                 # Main loop
                 imt_pdts = []
                 for i, (estep, eflow) in enumerate(list(zip(elementary_steps, eflows))):
-                    entering_rcts = entry_points.get(i, [])
+                    entering_rcts = rct_entry_points.get(i, [])
+
+                    # Map start atom map numbers to end atom map numbers
+                    # prior to translation
+                    for pdt in pdt_formation_points.get(i, []):
+                        for atom in pdt.GetAtoms():
+                            start = current2start.get(atom.GetAtomMapNum(), None)
+                            if start is not None:
+                                start2end[start] = atom.GetProp('post_mech')
 
                     # Translate
                     one_step_translation, imt_rcts = translate(entering_rcts, imt_pdts, estep[0])
-                    for k1, v1 in current_aidxs.items():
-                        for k2, v2 in v1.items():
-                            if v2 in one_step_translation:
-                                current_aidxs[k1][k2] = one_step_translation[v2]
+                    # one_step_translation = {k: v for k, v in one_step_translation.items() if k in current2start}
+                    for current, _next in one_step_translation.items():
+                        
+                        if current in current2start:
+                            start2current[current2start[current]] = _next
+                        
+                    current2start = {v: k for k, v in start2current.items()}
 
                     # Label atoms involved in this step
                     atoms_in_eflows = set(
@@ -296,28 +340,38 @@ def main(cfg: DictConfig):
                     ) # Collect atoms in eflows
                     atoms_involved_this_step = atoms_in_eflows.union(involved_in_coord_bonds[i]) # Add atoms involved in coordinate bonds
                     atoms_involved_this_step = [int(elt.removeprefix('a')) for elt in atoms_involved_this_step]
-                    for k1, v1 in current_aidxs.items():
-                        for k2, v2 in v1.items():
-                            if v2 in atoms_involved_this_step:
-                                involved_atoms[k1][k2] = True
+                    for current in current2start.keys():
+                        if current in atoms_involved_this_step:
+                            involved_atoms[current2start[current]] = True
 
                     # Transform
                     imt_pdts = transform(estep[0], estep[1], imt_rcts)
 
+                
+                if None in start2end.values():
+                    log.info(f"Failed to get atom mapping for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    continue
+
+                # Translate end atom map numbers to start atom map numbers
+                am = 1
+                mech_atoms = [[] for _ in range(len(overall_lhs))]
+                rhs_am_aidx = [{atom.GetAtomMapNum(): atom.GetIdx() for atom in mol.GetAtoms()} for mol in overall_rhs]
+                for i, mol in enumerate(overall_lhs):
+                    for atom in mol.GetAtoms():
+                        old_am = atom.GetAtomMapNum()
+                        key = f"{i}_{old_am}"
+                        pdt_idx, rhs_old_am = [int(elt) for elt in start2end[key].split('_')]
+                        rhs_aidx = rhs_am_aidx[pdt_idx][rhs_old_am]
+                        overall_rhs[pdt_idx].GetAtomWithIdx(rhs_aidx).SetAtomMapNum(am)
+                        atom.SetAtomMapNum(am)
+                        mech_atoms[i].append(am)
+                        am += 1
+
                 # Append
                 # Note: ignoreAtomMapNumbers option required on lhs to canonicalize SMILES
                 # and indices in spite of the present use of atom map numbers to label mech atoms
-                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in tmp_overall_rhs])
-                mech_atoms = []
-                for i in sorted(involved_atoms.keys()):
-                    tmp = []
-                    for j in sorted(involved_atoms[i].keys()):
-                        if involved_atoms[i][j]:
-                            tmp.append(overall_lhs[i].GetAtomWithIdx(j).GetAtomMapNum())
-
-                    mech_atoms.append(tmp)
-
-                if all(len(tmp) == 0 for tmp in mech_atoms): # This would be true if you were looking at wrong direction of reaction
+                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" + ".".join([Chem.MolToSmiles(mol) for mol in overall_rhs])
+                if all(len(elt) == 0 for elt in mech_atoms): # This would be true if you were looking at wrong direction of reaction
                     continue
                 
                 mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, rc_to_str([mech_atoms, [[]]]), entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
