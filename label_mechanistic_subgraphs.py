@@ -170,7 +170,7 @@ def main(cfg: DictConfig):
 
     mech_labeled_reactions = []
     columns = ['entry_id', 'mechanism_id', 'smarts', 'mech_atoms', "enzyme_name", "uniprot_id", "ec"]
-    for entry_id, entry in {'722': entries['722']}.items():#entries.items():
+    for entry_id, entry in {'711': entries['711']}.items():#entries.items():
         reaction_entry = entry['reaction']
         tmp_overall_lhs, tmp_overall_rhs = get_overall_reaction(reaction_entry['compounds'], Path(cfg.filepaths.raw_mcsa) / "mols")
         tmp_overall_lhs = [elt for elt in tmp_overall_lhs if not is_hydrogen(elt)] # Forgive H ions
@@ -200,6 +200,7 @@ def main(cfg: DictConfig):
         alternates.extend(rev)
 
         for mech in reaction_entry['mechanisms']:
+            
             if not mech['is_detailed']:
                 continue
 
@@ -226,6 +227,7 @@ def main(cfg: DictConfig):
                     tmp = set()
                     for mol in lhs:
                         for atom in mol.GetAtoms():
+                            
                             if atom.GetIntProp('coord_bond') == 1:
                                 tmp.add(atom.GetProp('mcsa_id'))
 
@@ -285,10 +287,13 @@ def main(cfg: DictConfig):
                 found_pdts = len(overall_rhs) >= sum(1 for m in tmp_overall_rhs)
 
                 if not found_rcts or not found_pdts:
+                    
                     if not found_rcts:
                         log.info(f"Reactants not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    
                     if not found_pdts:
                         log.info(f"Products not found for entry {entry_id}, mechanism {mech['mechanism_id']}")
+                    
                     continue
 
 
@@ -319,12 +324,12 @@ def main(cfg: DictConfig):
                     for pdt in pdt_formation_points.get(i, []):
                         for atom in pdt.GetAtoms():
                             start = current2start.get(atom.GetAtomMapNum(), None)
+                            
                             if start is not None:
                                 start2end[start] = atom.GetProp('post_mech')
 
                     # Translate
                     one_step_translation, imt_rcts = translate(entering_rcts, imt_pdts, estep[0])
-                    # one_step_translation = {k: v for k, v in one_step_translation.items() if k in current2start}
                     for current, _next in one_step_translation.items():
                         
                         if current in current2start:

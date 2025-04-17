@@ -19,6 +19,9 @@ class CmlAtom(BaseModel):
     rgroup_ref: str | None
     mrv_extra_label: str | None
 
+    def __lt__(self, other):
+        return self.id < other.id
+
 class CmlBond(BaseModel):
     """
     Bond from CML file
@@ -125,7 +128,9 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
         (2, None): Chem.rdchem.BondType.DOUBLE,
         (3, None): Chem.rdchem.BondType.TRIPLE
     }
-    for catom in cml_atoms:
+
+    am = 1
+    for catom in sorted(cml_atoms):
         if catom.element_type == 'R':
             aidx = rw_mol.AddAtom(Chem.Atom('*'))
         else:
@@ -133,7 +138,7 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
         
         mcsa2rdkit[catom.id] = aidx
         rw_mol.GetAtomWithIdx(aidx).SetProp('mcsa_id', catom.id)
-        rw_mol.GetAtomWithIdx(aidx).SetAtomMapNum(int(catom.id.strip('a')))
+        rw_mol.GetAtomWithIdx(aidx).SetAtomMapNum(am)
         rw_mol.GetAtomWithIdx(aidx).SetFormalCharge(catom.formal_charge)
         
         if catom.mrv_alias is not None:
@@ -146,6 +151,8 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
             rw_mol.GetAtomWithIdx(aidx).SetProp('mrv_extra_label', catom.mrv_extra_label)
 
         rw_mol.GetAtomWithIdx(aidx).SetIntProp('coord_bond', 0) # Avoids downstream KeyError
+
+        am += 1
 
     for cbond in cml_bonds:
         bond_type = bond_types.get((cbond.order, cbond.convention))
