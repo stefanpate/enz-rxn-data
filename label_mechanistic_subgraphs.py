@@ -54,26 +54,37 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
     for lmol in lhs:
         found = False
         for rmol in rhs_prev:
-            if lmol.GetNumAtoms() != rmol.GetNumAtoms():
+            if lmol.GetNumAtoms() != rmol.GetNumAtoms(): # Cardinality different
                 continue
 
             ss_match = lmol.GetSubstructMatch(rmol)
-            if len(ss_match) == lmol.GetNumAtoms():
+            if len(ss_match) == lmol.GetNumAtoms(): # Mols match
                 print("Found match")
                 print(Chem.MolToSmiles(lmol) ,'\n', Chem.MolToSmiles(rmol))
-                for i, elt in enumerate(ss_match):
-                    old_amn = rmol.GetAtomWithIdx(i).GetAtomMapNum()
-                    new_amn = lmol.GetAtomWithIdx(elt).GetAtomMapNum()
-                    back_translations[new_amn] = old_amn
-                
+                found = True
+                break
+            
+            lmol_std = standardize_mol(lmol, quiet=True)
+            rmol_std = standardize_mol(rmol, quiet=True)
+            ss_match = lmol_std.GetSubstructMatch(rmol_std)
+            
+            if len(ss_match) == lmol_std.GetNumAtoms(): # Standardized mols match
+                print("Found match")
+                print(Chem.MolToSmiles(lmol) ,'\n', Chem.MolToSmiles(rmol))
                 found = True
                 break
         
-        if not found:
+        if found:
+            for i, elt in enumerate(ss_match):
+                old_amn = rmol.GetAtomWithIdx(i).GetAtomMapNum()
+                new_amn = lmol.GetAtomWithIdx(elt).GetAtomMapNum()
+                back_translations[new_amn] = old_amn
+        else:
             print("No match")
             print(Chem.MolToSmiles(lmol))
             new.append(lmol)
     
+    # Reindex new to disambiguate with old
     for mol in new:
         for atom in mol.GetAtoms():
             new_amn = atom.GetAtomMapNum()
@@ -140,14 +151,17 @@ def main(cfg: DictConfig):
 
                 try:
                     lhs = construct_mols(atoms.values(), bonds.values())
-                    rhs = msm(construct_mols(next_atoms.values(), next_bonds.values()))
+                    rhs = construct_mols(next_atoms.values(), next_bonds.values())
                     
-                    meflows = set(chain(*[chain(elt.from_, elt.to) for elt in meflows.values()]))
-                    step_mech_atoms = set()
-                    for mol in lhs.GetAtoms():
-                        for atom in mol.GetAtoms():
-                            if atom.GetProp('mcsa_id') in meflows or atom.GetIntProp('coord_bond') == 1:
-                                step_mech_atoms.add(atom.GetAtomMapNum())
+                    # meflows = set(chain(*[chain(elt.from_, elt.to) for elt in meflows.values()]))
+                    # step_mech_atoms = set()
+                    # for mol in lhs.GetAtoms():
+                    #     for atom in mol.GetAtoms():
+                    #         if atom.GetProp('mcsa_id') in meflows or atom.GetIntProp('coord_bond') == 1:
+                    #             step_mech_atoms.add(atom.GetAtomMapNum())
+
+                    lhs = msm(lhs)
+                    rhs = msm(rhs)
                 
                 except Exception as e: # Catch errors in mechanism annotation
                     log.info(f"Error constructing mols for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
@@ -157,7 +171,7 @@ def main(cfg: DictConfig):
                 if i == 0:
                     overall_lhs = lhs
                     overall_rhs = rhs
-                    mech_atoms = step_mech_atoms
+                    # mech_atoms = step_mech_atoms
                 else:
                     print(f"\n{i}")
                     back_translations = back_translate(prev_rhs, lhs, next_amn)
@@ -167,8 +181,8 @@ def main(cfg: DictConfig):
                             new_amn = atom.GetAtomMapNum()
                             atom.SetAtomMapNum(back_translations[new_amn])
 
-                            if new_amn in step_mech_atoms:
-                                mech_atoms.add(back_translations[new_amn])
+                            # if new_amn in step_mech_atoms:
+                            #     mech_atoms.add(back_translations[new_amn])
 
                     # print(sorted([Chem.MolToSmiles(mol) for mol in overall_lhs]), '\n')
                     overall_lhs = mol_union(overall_lhs, mol_left_diff(lhs, prev_rhs))
@@ -177,7 +191,7 @@ def main(cfg: DictConfig):
 
                 next_amn += sum(mol.GetNumAtoms() for mol in lhs)
                 prev_rhs = rhs
-                prev_lhs = lhs
+                # prev_lhs = lhs
 
             if misannotated_mechanism:
                 continue
