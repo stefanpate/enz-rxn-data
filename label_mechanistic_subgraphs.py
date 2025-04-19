@@ -74,8 +74,8 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
 
             ss_match = lmol.GetSubstructMatch(rmol)
             if len(ss_match) == lmol.GetNumAtoms(): # Mols match
-                print("Found match")
-                print(Chem.MolToSmiles(rmol) ,'\n', Chem.MolToSmiles(lmol))
+                # print("Found match")
+                # print(Chem.MolToSmiles(rmol) ,'\n', Chem.MolToSmiles(lmol))
 
                 for i, elt in enumerate(ss_match):
                     old_amn = rmol.GetAtomWithIdx(i).GetAtomMapNum()
@@ -92,8 +92,8 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
             ss_match = lmol_std.GetSubstructMatch(rmol_std)
             
             if len(ss_match) == lmol_std.GetNumAtoms(): # Standardized mols match
-                print("Found match")
-                print(Chem.MolToSmiles(rmol_std) ,'\n', Chem.MolToSmiles(lmol_std))
+                # print("Found match")
+                # print(Chem.MolToSmiles(rmol_std) ,'\n', Chem.MolToSmiles(lmol_std))
 
                 for i, elt in enumerate(ss_match):
                     old_amn = rmol_std.GetAtomWithIdx(i).GetAtomMapNum()
@@ -112,8 +112,8 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
                 break
         
         if not found:
-            print("No match")
-            print(Chem.MolToSmiles(lmol))
+            # print("No match")
+            # print(Chem.MolToSmiles(lmol))
             new.append(lmol)
     
     # Reindex new to disambiguate with old
@@ -154,7 +154,7 @@ def main(cfg: DictConfig):
 
     # Load entries
     entries = {}
-    for i in range(1):#cfg.entry_batches:
+    for i in cfg.entry_batches:
         with open(Path(cfg.filepaths.raw_mcsa) / f"entries_{i}.json", "r") as f:
             entries = {**entries, **json.load(f)}
 
@@ -211,7 +211,7 @@ def main(cfg: DictConfig):
                     overall_rhs = rhs
                     mech_atoms = step_mech_atoms # On 1st step, indices need not be back translated
                 else:
-                    print(f"\n{i}")
+                    # print(f"\n{i}")
 
                     try:
                         back_translations = back_translate(prev_rhs, lhs, next_amn)
@@ -238,11 +238,14 @@ def main(cfg: DictConfig):
             if misannotated_mechanism:
                 continue
 
-            # ignoreAtomMapNumbers option required on lhs to canonicalize SMILES in a way that doesn't depend on atom map numbers
-            smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" +\
-                ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_rhs])
-            mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, list(mech_atoms), entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
-
+            # TODO: Figure out strict limit on atom map numbers thing. See notepad
+            try:
+                # ignoreAtomMapNumbers option required on lhs to canonicalize SMILES in a way that doesn't depend on atom map numbers
+                smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" +\
+                    ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_rhs])
+                mech_labeled_reactions.append([entry_id, mech['mechanism_id'], smarts, list(mech_atoms), entry.get("enzyme_name"), entry.get("reference_uniprot_id"), entry["reaction"].get("ec")])
+            except:
+                continue
     # Save
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
     df.to_csv("mech_labeled_reactions.csv", index=False)
