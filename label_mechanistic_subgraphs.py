@@ -5,13 +5,10 @@ from pathlib import Path
 import json
 from copy import deepcopy
 from itertools import chain
-# from typing import Iterable
 from collections import defaultdict
 from rdkit import Chem
-# from rdkit.Chem import rdChemReactions
 import pandas as pd
 from ergochemics.standardize import standardize_mol
-from ergochemics.mapping import rc_to_str
 from enz_rxn_data.mechanism import (
     parse_mrv,
     construct_mols,
@@ -34,15 +31,6 @@ def is_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
             rhs_atoms[atom.GetSymbol()] += 1
 
     return lhs_atoms == rhs_atoms
-
-# def standardize_de_atom_map(mol: Chem.Mol) -> str:
-#     mol = deepcopy(mol)
-#     for atom in mol.GetAtoms():
-#         atom.SetAtomMapNum(0)
-    
-#     mol = standardize_mol(mol, quiet=True)
-
-#     return Chem.MolToSmiles(mol)
 
 def neutralize_atoms(mol: Chem.Mol) -> Chem.Mol:
     mol = deepcopy(mol)

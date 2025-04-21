@@ -4,11 +4,15 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from tqdm import tqdm
 import pandas as pd
-from itertools import product, permutations
+import numpy as np
+from itertools import product, permutations, chain
+from functools import reduce
 from typing import Iterable
 from rdkit import Chem
 from ast import literal_eval
 import logging
+from collections import defaultdict
+from ergochemics.standardize import standardize_mol
 from ergochemics.mapping import (
     operator_map_reaction,
     _m_standardize_reaction,
@@ -61,28 +65,19 @@ def clean_up_mcsa(mech_atoms: Iterable[Iterable[Iterable[int]]], rxn: str) -> tu
 
     return rct_idxs, rxn
 
-def match_rcts_post_mapping(pre: str, post: str) -> tuple[int]:
-    pre_lhs = pre.split(">>")[0].split('.')
-    post_lhs = post.split(">>")[0].split('.')
-    if len(pre_lhs) != len(post_lhs):
-        raise ValueError("Pre and post reaction have different number of reactants")
+def standardize_de_atom_map(mol: Chem.Mol) -> str:
+    for atom in mol.GetAtoms():
+        atom.SetAtomMapNum(0)
     
-    if len(pre_lhs) == 1:
-        return [0]
+    mol = standardize_mol(mol, quiet=True)
 
-    pre_rct_idxs = [i for i in range(len(pre_lhs))]
-    for perm_idx in permutations(pre_rct_idxs):
-        perm = [pre_lhs[i] for i in perm_idx]
-        
-        if all([pre == post for pre, post in zip(perm, post_lhs)]):
-            return perm_idx
-        
-    raise ValueError("No matching reactants found")
+    return Chem.MolToSmiles(mol)
 
 log = logging.getLogger(__name__)
 
 @hydra.main(version_base=None, config_path="conf", config_name="distill_mech_labeled_reactions")
 def main(cfg: DictConfig):
+    min_amn = lambda mol: min(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum() > 0)
 
     # Load reactions
     mech_rxns = pd.read_csv(filepath_or_buffer=Path(cfg.mech_rxns), sep=",")
@@ -91,85 +86,133 @@ def main(cfg: DictConfig):
     # Remove atom map numbers & translate mech_atoms from am nums to atom idxs
     mech_atom_idxs = []
     de_am_rxns = []
-    for i, row in mech_rxns.iterrows():
-        mech_idxs, rxn = clean_up_mcsa(row["mech_atoms"], row["smarts"])
-        mech_atom_idxs.append(mech_idxs)
-        de_am_rxns.append(rxn)
+    for _, row in mech_rxns.iterrows():
+        lhs_smi_pos = defaultdict(list)
+        rhs_smi_pos = defaultdict(list)
+        lhs, rhs = [side.split('.') for side in row["smarts"].split('>>')]
 
-    mech_rxns["mech_atoms"] = mech_atom_idxs
-    mech_rxns["smarts"] = de_am_rxns
-    mech_rxns["smarts"] = mech_rxns["smarts"].apply(lambda x: _m_standardize_reaction(x)) # Standardize pre operator mapping to allow matching by smiles after
-    
-    # Load rules
-    rules = pd.read_csv(Path(cfg.filepaths.rules) / "min_rules.csv", sep=",", index_col=0)
-    chunksize = len(rules)
+        for i, smi in enumerate(lhs):
+            lhs_smi_pos[
+                standardize_de_atom_map(Chem.MolFromSmiles(smi))
+            ].append(i)
+            
+        for i, smi in enumerate(rhs):
+            rhs_smi_pos[
+                standardize_de_atom_map(Chem.MolFromSmiles(smi))
+            ].append(i)
 
-    rxn_rule_cart_prod = product(mech_rxns.index, rules.index)
-    tasks = [(rxn_id, mech_rxns.loc[rxn_id, "smarts"], rule_id, rules.loc[rule_id, "smarts"]) for rxn_id, rule_id in rxn_rule_cart_prod]
-    rxn_ids, rxns, rule_ids, rules = zip(*tasks)
-    
-    # Map
-    with ProcessPoolExecutor() as executor:
-        results = list(
-            tqdm(
-                executor.map(operator_map_reaction, rxns, rules, chunksize=chunksize),
-                total=len(tasks)
-            )
-        )
-    
-    # Compile results
+        # Filter out smarts that are in both sides with equal cardinalities
+        unequal_cards = set()
+        lhs_keep = set()
+        for k, v in lhs_smi_pos.items():
+            if k not in rhs_smi_pos:
+                for i in v:
+                    lhs_keep.add(i)
+            elif len(v) != len(rhs_smi_pos[k]):
+                unequal_cards.add(k)
+        
+        rhs_keep = set()
+        for k, v in rhs_smi_pos.items():
+            if k not in lhs_smi_pos:
+                for i in v:
+                    rhs_keep.add(i)
+            elif len(v) != len(lhs_smi_pos[k]):
+                unequal_cards.add(k)
+
+        lhs_mols = [
+            Chem.MolFromSmiles(lhs[i] for i in lhs_keep),
+        ]
+        rhs_mols = [
+            Chem.MolFromSmiles(rhs[i] for i in rhs_keep),
+        ]
+
+        lhs_amns = list(chain(*[
+            [atom.GetAtomMapNum() for atom in mol.GetAtoms()]
+            for mol in lhs_mols
+        ]))
+        rhs_amns = list(chain(*[
+            [atom.GetAtomMapNum() for atom in mol.GetAtoms()]
+            for mol in rhs_mols
+        ]))
+
+        del lhs_amns, rhs_amns, lhs_keep, rhs_keep
+
+        # Keep only those from unequal_cards that have have amn on other side of distinct mols, i.e., those in lhs/rhs mols
+        for i in unequal_cards:
+
+            for j in lhs_smi_pos[i]:
+                found = False
+                mol = Chem.MolFromSmiles(lhs[j])
+                for atom in mol.GetAtoms():
+                    if atom.GetAtomMapNum() in rhs_amns:
+                        lhs_mols.append(mol)
+                        found = True
+                        break
+
+                if found:
+                    break
+
+            for j in rhs_smi_pos[i]:
+                found = False
+                mol = Chem.MolFromSmiles(rhs[j])
+                for atom in mol.GetAtoms():
+                    if atom.GetAtomMapNum() in lhs_amns:
+                        rhs_mols.append(mol)
+                        found = True
+                        break
+
+                if found:
+                    break
+
+        # Get reaction center amns
+        lhs = reduce(Chem.CombineMols, lhs_mols)
+        rhs = reduce(Chem.CombineMols, rhs_mols)
+        lhs_A = Chem.GetAdjacencyMatrix(lhs, useBO=True)
+        rhs_A = Chem.GetAdjacencyMatrix(rhs, useBO=True)
+        rc_amns = np.abs(lhs_A - rhs_A).sum(axis=1).nonzero()[0].tolist()
+
+        # Convert from amns in aidxs
+        rc_aidxs = [[], []]
+        mech_aidxs = [[], []]
+        mech_amns = row['mech_atoms']
+        for i, side in enumerate([lhs_mols, rhs_mols]):
+            for mol in side:
+                for atom in mol.GetAtoms():
+                    amn = atom.GetAtomMapNum()
+                    if amn in rc_amns:
+                        rc_aidxs[i].append(atom.GetIdx())
+                    elif amn in mech_amns[i]:
+                        mech_aidxs[i].append(atom.GetIdx())
+
+        std_rxn = [[], []]
+        for i, side in enumerate([lhs_mols, rhs_mols]):
+            amn_order = sorted([j for j in range(len(side))], key=lambda x: min_amn(side[x]))
+            for j in amn_order:
+                std_rxn[i].append(
+                    Chem.MolToSmiles(
+                        standardize_de_atom_map(side[j]),
+                        ignoreAtomMapNumbers=True
+                        )
+                )
+
+            rc_aidxs[i] = [rc_aidxs[i][j] for j in amn_order]
+            mech_aidxs[i] = [mech_aidxs[i][j] for j in amn_order]
+
+        std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
+
+
+
+        
+
+        
+
+
+        
     columns = ["rxn_id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
     data = []
     for rxn_id, _, rule, res, rule_id in zip(rxn_ids, rxns, rules, results, rule_ids):
         if res.did_map:
             data.append([rxn_id, res.aligned_smarts, res.atom_mapped_smarts, rule, res.reaction_center, rule_id])
-
-    df = pd.DataFrame(data, columns=columns)
-
-    # Resolved multiple mappings
-    selected = []
-    for name, group in df.groupby("rxn_id"):
-        if len(group) == 1:
-            selected.append(group.iloc[0])
-        else:
-            cc_breaks = group["am_smarts"].apply(does_break_cc)
-
-            if cc_breaks.all() or not cc_breaks.any():
-                selected.append(group.loc[group["rule"].map(rule_cts).idxmax()])
-            else:
-                not_cc = group.loc[~cc_breaks]
-                selected.append(not_cc.loc[not_cc["rule"].map(rule_cts).idxmax()])
-
-    selected = pd.DataFrame(selected, columns=df.columns)
-
-    # Compile with other mech rxn cols
-    bad_sidxs = []
-    bad_ids = []
-    for sidx, row in selected.iterrows():
-        rxn_id = row['rxn_id']
-        post = row["smarts"]
-        pre = mech_rxns.loc[rxn_id, "smarts"]
-        try:
-            perm_idx = match_rcts_post_mapping(pre, post)
-            aligned = [mech_rxns.loc[rxn_id]["mech_atoms"][i] for i in perm_idx]
-            mech_rxns.at[rxn_id, 'mech_atoms'] = aligned
-        except ValueError as e:
-            log.info(f"Error matching reactants for {rxn_id}: {e} with smarts {pre} and {post}")
-            bad_sidxs.append(sidx)
-            bad_ids.append(rxn_id)
-
-    mech_rxns.drop(labels=bad_ids, inplace=True)
-    selected.drop(labels=bad_sidxs, inplace=True)
-    selected.set_index("rxn_id", inplace=True)
-    
-    compiled = pd.concat(
-        [
-            mech_rxns.loc[:, [col for col in mech_rxns.columns if col != "smarts"]],
-            selected.loc[:, [col for col in selected.columns if col != 'rxn_id']]
-        ],
-        axis=1,
-        join="inner"
-    )
 
     compiled.reset_index(drop=True, inplace=True)
     compiled = compiled[
