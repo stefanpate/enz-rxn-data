@@ -1,0 +1,11 @@
+defaults:
+  - filepaths: filepaths
+  - _self_
+
+mech_rxns: ${filepaths.interim_data}/mcsa/mech_labeled_reactions.csv
+
+hydra:
+  run:
+    dir: ${filepaths.processed_data}/mcsa
+  job:
+    chdir: True
