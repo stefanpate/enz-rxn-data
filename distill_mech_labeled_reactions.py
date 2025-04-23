@@ -150,28 +150,18 @@ def main(cfg: DictConfig):
         for i in unequal_cards:
 
             for j in lhs_smi_pos[i]:
-                found = False
                 mol = Chem.MolFromSmiles(lhs[j])
                 for atom in mol.GetAtoms():
                     if atom.GetAtomMapNum() in rhs_amns:
                         lhs_mols.append(mol)
-                        found = True
                         break
 
-                if found:
-                    break
-
             for j in rhs_smi_pos[i]:
-                found = False
                 mol = Chem.MolFromSmiles(rhs[j])
                 for atom in mol.GetAtoms():
                     if atom.GetAtomMapNum() in lhs_amns:
                         rhs_mols.append(mol)
-                        found = True
                         break
-
-                if found:
-                    break
 
         # Create combined molecules
         lhs = reduce(Chem.CombineMols, lhs_mols)
@@ -232,7 +222,7 @@ def main(cfg: DictConfig):
     distilled = pd.DataFrame(data, columns=columns)
     distilled["mech_atoms"] = distilled["mech_atoms"].apply(rc_to_str)
     distilled["reaction_center"] = distilled["reaction_center"].apply(rc_to_str)
-    distilled.to_parquet("mapped_mech_labeled_reactions.parquet") # Save
+    distilled.to_parquet("distilled_mech_reactions.parquet") # Save
 
 if __name__ == "__main__":
     main()
