@@ -3,9 +3,9 @@ import logging
 from omegaconf import DictConfig
 from pathlib import Path
 import json
-from copy import deepcopy
 from itertools import chain
-from collections import defaultdict
+from collections import defaultdict, Counter
+from functools import reduce
 from rdkit import Chem
 import pandas as pd
 from ergochemics.standardize import standardize_mol
@@ -15,37 +15,16 @@ from enz_rxn_data.mechanism import (
     step
 )
 
-def is_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
-    if len(lhs) == 0 or len(rhs) == 0:
-        return False
+def is_strictly_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
+    '''
+    Check if the reaction is strictly balanced, i.e., all atom map numbers are conserved.
+    '''
+    lhs = reduce(Chem.CombineMols, lhs)
+    rhs = reduce(Chem.CombineMols, rhs)
+    lhs_elements = {f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}" for atom in lhs.GetAtoms() if atom.GetSymbol() != 'H'}
+    rhs_elements = {f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}" for atom in rhs.GetAtoms() if atom.GetSymbol() != 'H'}
     
-    lhs_atoms = defaultdict(int)
-    rhs_atoms = defaultdict(int)
-
-    for mol in lhs:
-        for atom in mol.GetAtoms():
-            lhs_atoms[atom.GetSymbol()] += 1
-
-    for mol in rhs:
-        for atom in mol.GetAtoms():
-            rhs_atoms[atom.GetSymbol()] += 1
-
-    return lhs_atoms == rhs_atoms
-
-def neutralize_atoms(mol: Chem.Mol) -> Chem.Mol:
-    mol = deepcopy(mol)
-    pattern = Chem.MolFromSmarts("[+1!h0!$([*]~[-1,-2,-3,-4]),-1!$([*]~[+1,+2,+3,+4])]")
-    at_matches = mol.GetSubstructMatches(pattern)
-    at_matches_list = [y[0] for y in at_matches]
-    for at_idx in at_matches_list:
-        atom = mol.GetAtomWithIdx(at_idx)
-        chg = atom.GetFormalCharge()
-        hcount = atom.GetTotalNumHs()
-        atom.SetFormalCharge(0)
-        atom.SetNumExplicitHs(hcount - chg)
-        atom.UpdatePropertyCache()
-    
-    return mol
+    return len(lhs_elements ^ rhs_elements) == 0
 
 def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int = 1) -> dict[int, int]:
     '''
@@ -54,16 +33,18 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
     '''
     back_translations = {}
     new = []
-    for lmol in lhs:
+    influx_idxs = []
+    outflux_idxs = set([i for i in range(len(rhs_prev))])
+    for lidx, lmol in enumerate(lhs):
         found = False
-        for rmol in rhs_prev:
+        for idx in outflux_idxs:
+            rmol = rhs_prev[idx]
+
             if lmol.GetNumAtoms() != rmol.GetNumAtoms(): # Cardinality different
                 continue
 
             ss_match = lmol.GetSubstructMatch(rmol)
             if len(ss_match) == lmol.GetNumAtoms(): # Mols match
-                # print("Found match")
-                # print(Chem.MolToSmiles(rmol) ,'\n', Chem.MolToSmiles(lmol))
 
                 for i, elt in enumerate(ss_match):
                     old_amn = rmol.GetAtomWithIdx(i).GetAtomMapNum()
@@ -71,17 +52,14 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
                     back_translations[new_amn] = old_amn
                 
                 found = True
+                outflux_idxs.remove(idx)
                 break
             
-            lmol_std = standardize_mol(lmol, quiet=True, do_neutralize=False)
-            rmol_std = standardize_mol(rmol, quiet=True, do_neutralize=False)
-            lmol_std = neutralize_atoms(lmol_std)
-            rmol_std = neutralize_atoms(rmol_std)
+            lmol_std = standardize_mol(lmol, quiet=True)
+            rmol_std = standardize_mol(rmol, quiet=True)
             ss_match = lmol_std.GetSubstructMatch(rmol_std)
             
             if len(ss_match) == lmol_std.GetNumAtoms(): # Standardized mols match
-                # print("Found match")
-                # print(Chem.MolToSmiles(rmol_std) ,'\n', Chem.MolToSmiles(lmol_std))
 
                 for i, elt in enumerate(ss_match):
                     old_amn = rmol_std.GetAtomWithIdx(i).GetAtomMapNum()
@@ -97,12 +75,12 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
                     #     pass
 
                 found = True
+                outflux_idxs.remove(idx)
                 break
         
         if not found:
-            # print("No match")
-            # print(Chem.MolToSmiles(lmol))
             new.append(lmol)
+            influx_idxs.append(lidx)
     
     # Reindex new to disambiguate with old
     for mol in new:
@@ -111,27 +89,7 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
             back_translations[new_amn] = next_amn
             next_amn += 1
 
-    return back_translations
-
-def mol_union(left: list[Chem.Mol], right: list[Chem.Mol]) -> list[Chem.Mol]:
-    '''
-    Takes union of two lists of mols
-    '''
-    left = {Chem.MolToSmiles(mol) for mol in left}
-    right = {Chem.MolToSmiles(mol) for mol in right}
-
-    lur = left | right
-    return [Chem.MolFromSmiles(k) for k in lur]
-
-def mol_left_diff(left: list[Chem.Mol], right: list[Chem.Mol]) -> list[Chem.Mol]:
-    '''
-    Takes left difference of two lists of mols
-    '''
-    left = {Chem.MolToSmiles(mol) for mol in left}
-    right = {Chem.MolToSmiles(mol) for mol in right}
-
-    ldr = left - right
-    return [Chem.MolFromSmiles(k) for k in ldr]
+    return back_translations, influx_idxs, outflux_idxs
 
 log = logging.getLogger(__name__)
 
@@ -196,18 +154,18 @@ def main(cfg: DictConfig):
                 
                 if i == 0:
                     overall_lhs = lhs
-                    overall_rhs = rhs
+                    overall_rhs = []
                     mech_atoms = step_mech_atoms # On 1st step, indices need not be back translated
                 else:
-                    # print(f"\n{i}")
 
                     try:
-                        back_translations = back_translate(prev_rhs, lhs, next_amn)
+                        back_translations, influx_idxs, outflux_idxs = back_translate(prev_rhs, lhs, next_amn)
                     except ValueError as e:
                         log.info(f"Error back translating for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
                         misannotated_mechanism = True
                         break
 
+                    # Translate this step lhs and rhs mols back to previous
                     for mol in lhs + rhs:
                         for atom in mol.GetAtoms():
                             new_amn = atom.GetAtomMapNum()
@@ -217,13 +175,26 @@ def main(cfg: DictConfig):
                             if new_amn in step_mech_atoms:
                                 mech_atoms.add(back_translations[new_amn])
 
-                    overall_lhs = mol_union(overall_lhs, mol_left_diff(lhs, prev_rhs))
-                    overall_rhs = mol_union(mol_left_diff(overall_rhs, lhs), rhs)
+                    overall_lhs.extend([lhs[i] for i in influx_idxs]) # Add new mols to lhs
+                    overall_rhs.extend([prev_rhs[i] for i in outflux_idxs])
 
                 next_amn += N_i
                 prev_rhs = rhs
 
             if misannotated_mechanism:
+                continue
+
+            overall_rhs.extend(rhs) # Add last step rhs to overall rhs
+
+            lhs_amns = Counter([atom.GetAtomMapNum() for mol in overall_lhs for atom in mol.GetAtoms()])
+            rhs_amns = Counter([atom.GetAtomMapNum() for mol in overall_rhs for atom in mol.GetAtoms()])
+
+            if any([elt > 1 for elt in lhs_amns.values()]) or any([elt > 1 for elt in rhs_amns.values()]):
+                log.info(f"Entry {(entry_id, mech['mechanism_id'])} has non-unique atom map numbers in lhs or rhs")
+                continue
+
+            if not is_strictly_balanced(overall_lhs, overall_rhs):
+                log.info(f"Entry {(entry_id, mech['mechanism_id'])} is not strictly balanced")
                 continue
 
             # TODO: Figure out strict limit on atom map numbers thing. See notepad
