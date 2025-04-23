@@ -307,30 +307,35 @@ def main(cfg: DictConfig):
         rc_amns = [lhs_amns[lhs_perm[i]] for i in rc] # Translate back to amns; either lhs or rhs will do
 
         # Convert from amns in aidxs
-        rc_aidxs = [[], []]
-        mech_aidxs = [[], []]
+        tmp_rc = [[], []]
+        tmp_mech = [[], []]
         mech_amns = row['mech_atoms']
         for i, side in enumerate([lhs_mols, rhs_mols]):
             for mol in side:
-                rc_aidxs[i].append([])
-                mech_aidxs[i].append([])
+                tmp_rc[i].append([])
+                tmp_mech[i].append([])
                 for atom in mol.GetAtoms():
                     amn = atom.GetAtomMapNum()
                     if amn in rc_amns:
-                        rc_aidxs[i][-1].append(atom.GetIdx())
+                        tmp_rc[i][-1].append(atom.GetIdx())
                     elif amn in mech_amns:
-                        mech_aidxs[i][-1].append(atom.GetIdx())
+                        tmp_mech[i][-1].append(atom.GetIdx())
 
         std_rxn = [[], []]
         std_am_rxn = [[], []]
+        rc_aidxs = [[], []]
+        mech_aidxs = [[], []]
         for i, side in enumerate([lhs_mols, rhs_mols]):
             amn_order = sorted([j for j in range(len(side))], key=lambda x: min_amn(side[x]))
             for j in amn_order:
+
+                if len(tmp_rc[i][j]) == 0: # No reaction center atoms
+                    continue
+
                 std_am_rxn[i].append(Chem.MolToSmiles(side[j], ignoreAtomMapNumbers=True))
                 std_rxn[i].append(rm_amns(side[j]))
-
-            rc_aidxs[i] = [rc_aidxs[i][j] for j in amn_order]
-            mech_aidxs[i] = [mech_aidxs[i][j] for j in amn_order]
+                rc_aidxs[i].append(tmp_rc[i][j])
+                mech_aidxs[i].append(tmp_mech[i][j])
 
         std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
         std_am_rxn = ".".join(std_am_rxn[0]) + ">>" + ".".join(std_am_rxn[1])
