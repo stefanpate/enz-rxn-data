@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from pathlib import Path
 import json
 from itertools import chain
-from collections import defaultdict, Counter
+from collections import Counter
 from functools import reduce
 from rdkit import Chem
 import pandas as pd
