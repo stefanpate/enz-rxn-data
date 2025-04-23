@@ -66,13 +66,9 @@ def clean_up_mcsa(mech_atoms: Iterable[Iterable[Iterable[int]]], rxn: str) -> tu
 
     return rct_idxs, rxn
 
-def standardize_de_atom_map(mol: Chem.Mol) -> str:
-    mol = deepcopy(mol)
+def rm_amns(mol: Chem.Mol) -> str:
     for atom in mol.GetAtoms():
         atom.SetAtomMapNum(0)
-    
-    mol = standardize_mol(mol, quiet=True)
-
     return Chem.MolToSmiles(mol)
 
 def is_strictly_balanced(lhs: Chem.Mol, rhs: Chem.Mol) -> bool:
@@ -89,6 +85,7 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="distill_mech_labeled_reactions")
 def main(cfg: DictConfig):
     min_amn = lambda mol: min(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum() > 0)
+    sms_std = lambda smi: Chem.MolToSmiles(standardize_mol(Chem.MolFromSmiles(smi), quiet=True), ignoreAtomMapNumbers=True)
 
     # Load reactions
     mech_rxns = pd.read_csv(filepath_or_buffer=Path(cfg.mech_rxns), sep=",")
@@ -98,16 +95,19 @@ def main(cfg: DictConfig):
     for _, row in mech_rxns.iterrows():
         lhs_smi_pos = defaultdict(list)
         rhs_smi_pos = defaultdict(list)
-        lhs, rhs = [side.split('.') for side in row["smarts"].split('>>')]
+        lhs, rhs = [
+            [sms_std(smi) for smi in side.split('.')]
+            for side in row["smarts"].split('>>')
+        ]
 
         for i, smi in enumerate(lhs):
             lhs_smi_pos[
-                standardize_de_atom_map(Chem.MolFromSmiles(smi))
+                rm_amns(Chem.MolFromSmiles(smi))
             ].append(i)
             
         for i, smi in enumerate(rhs):
             rhs_smi_pos[
-                standardize_de_atom_map(Chem.MolFromSmiles(smi))
+                rm_amns(Chem.MolFromSmiles(smi))
             ].append(i)
 
         # Filter out smarts that are in both sides with equal cardinalities
@@ -179,7 +179,7 @@ def main(cfg: DictConfig):
         lhs_A = Chem.GetAdjacencyMatrix(lhs, useBO=True)[lhs_perm][:, lhs_perm]
         rhs_A = Chem.GetAdjacencyMatrix(rhs, useBO=True)[rhs_perm][:, rhs_perm]
         rc = np.abs(lhs_A - rhs_A).sum(axis=1).nonzero()[0].tolist()
-        rc_amns = [lhs.GetAtomWithIdx(i).GetAtomMapNum() for i in rc]
+        rc_amns = [lhs_amns[lhs_perm[i]] for i in rc] # Translate back to amns; either lhs or rhs will do
 
         # Convert from amns in aidxs
         rc_aidxs = [[], []]
@@ -202,7 +202,7 @@ def main(cfg: DictConfig):
             amn_order = sorted([j for j in range(len(side))], key=lambda x: min_amn(side[x]))
             for j in amn_order:
                 std_am_rxn[i].append(Chem.MolToSmiles(side[j], ignoreAtomMapNumbers=True))
-                std_rxn[i].append(standardize_de_atom_map(side[j]))
+                std_rxn[i].append(rm_amns(side[j]))
 
             rc_aidxs[i] = [rc_aidxs[i][j] for j in amn_order]
             mech_aidxs[i] = [mech_aidxs[i][j] for j in amn_order]
