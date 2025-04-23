@@ -351,8 +351,8 @@ def main(cfg: DictConfig):
         # Reverses
         data.append(
             [
-                row["entry_id"], row["mechanism_id"], ".".join(std_rxn.split('>>')[::-1]),
-                ".".join(std_am_rxn.split('>>')[::-1]), rc_aidxs[::-1], mech_aidxs[::-1],
+                row["entry_id"], row["mechanism_id"], ">>".join(std_rxn.split('>>')[::-1]),
+                ">>".join(std_am_rxn.split('>>')[::-1]), rc_aidxs[::-1], mech_aidxs[::-1],
                 row["enzyme_name"], row["uniprot_id"], row["ec"], False
             ]
         )
