@@ -340,14 +340,24 @@ def main(cfg: DictConfig):
         std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
         std_am_rxn = ".".join(std_am_rxn[0]) + ">>" + ".".join(std_am_rxn[1])
 
+        # Reported direction
         data.append(
             [
                 row["entry_id"], row["mechanism_id"], std_rxn, std_am_rxn,
-                rc_aidxs, mech_aidxs, row["enzyme_name"], row["uniprot_id"], row["ec"]
+                rc_aidxs, mech_aidxs, row["enzyme_name"], row["uniprot_id"], row["ec"], True
             ]
         )
 
-    columns = ["entry_id", "mechanism_id", "smarts", "am_smarts", "reaction_center", "mech_atoms", "enzyme_name", "uniprot_id", "ec"]
+        # Reverses
+        data.append(
+            [
+                row["entry_id"], row["mechanism_id"], ".".join(std_rxn.split('>>')[::-1]),
+                ".".join(std_am_rxn.split('>>')[::-1]), rc_aidxs[::-1], mech_aidxs[::-1],
+                row["enzyme_name"], row["uniprot_id"], row["ec"], False
+            ]
+        )
+
+    columns = ["entry_id", "mechanism_id", "smarts", "am_smarts", "reaction_center", "mech_atoms", "enzyme_name", "uniprot_id", "ec", "reported_direction"]
     distilled = pd.DataFrame(data, columns=columns)
     distilled["mech_atoms"] = distilled["mech_atoms"].apply(rc_to_str)
     distilled["reaction_center"] = distilled["reaction_center"].apply(rc_to_str)
