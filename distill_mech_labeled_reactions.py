@@ -340,6 +340,10 @@ def main(cfg: DictConfig):
         std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
         std_am_rxn = ".".join(std_am_rxn[0]) + ">>" + ".".join(std_am_rxn[1])
 
+        if std_rxn == '>>':
+            log.info(f"No molecules remain after removing non-rc-bearing molecules {(row['entry_id'], row['mechanism_id'])}")
+            continue
+
         # Reported direction
         data.append(
             [
