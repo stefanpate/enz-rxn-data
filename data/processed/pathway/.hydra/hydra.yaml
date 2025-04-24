@@ -111,12 +111,11 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task:
-    - src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_imt_rules.parquet
+    task: []
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_imt_rules.parquet
+    override_dirname: ''
     id: ???
     num: ???
     config_name: resolve_multiple_mappings

@@ -1,30 +1,26 @@
 from collections import Counter
 from omegaconf import DictConfig
 import hydra
+from hydra.utils import call
 import pandas as pd
 from pathlib import Path
-from enz_rxn_data.mapping import does_break_cc
+from ergochemics.mapping import rc_to_nest, rc_to_str
 
 @hydra.main(version_base=None, config_path="conf", config_name="resolve_multiple_mappings")
 def main(cfg: DictConfig):
     full = pd.read_parquet(Path(cfg.input_path))
     rule_cts = Counter(full["rule"])
+    full["reaction_center"] = full["reaction_center"].apply(rc_to_nest)
 
     selected = []
-    for name, group in full.groupby("rxn_id"):
-        if len(group) == 1:
-            selected.append(group.iloc[0])
-        else:
-            cc_breaks = group["am_smarts"].apply(does_break_cc)
-
-            if cc_breaks.all() or not cc_breaks.any():
-                selected.append(group.loc[group["rule"].map(rule_cts).idxmax()])
-            else:
-                not_cc = group.loc[~cc_breaks]
-                selected.append(not_cc.loc[not_cc["rule"].map(rule_cts).idxmax()])
+    for _, group in full.groupby("rxn_id"):
+        selected.append(
+            call(cfg.resolver, group, rule_cts)
+        )
     
     selected = pd.DataFrame(selected, columns=full.columns)
     selected.reset_index(drop=True, inplace=True)
+    selected["reaction_center"] = selected["reaction_center"].apply(rc_to_str)
 
     selected.to_parquet(f"mapped_{"_".join(cfg.src_file.split('_')[1:])}")
 

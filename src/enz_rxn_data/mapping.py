@@ -1,5 +1,6 @@
 from rdkit import Chem
 import numpy as np
+import pandas as pd
 from collections import Counter
 
 def get_bond_matrix(side: list[Chem.Mol], n_atoms: int) -> tuple[np.ndarray, dict[int, str]]:
@@ -91,3 +92,59 @@ def does_break_cc(rxn: str) -> bool:
     """
     bond_cts = count_bond_changes(rxn)
     return bond_cts[("CC", 1.0, 0.0)] > 0
+
+'''
+Multiple mapping resolvers
+'''
+
+def most_common_no_cc_break(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
+    '''
+    Chooses one rule-rxn mapping from among several based on what is the most
+    common, first preferring rules that don't call for breaking a CC bond
+
+    Args
+    ----
+    group: pd.DataFrame
+        A group of mappings for a single unique reaction. Must contain
+        columns: "am_smarts", "rule"
+    rule_cts: dict
+        A dictionary mapping rules to their counts in the full dataset
+    Returns
+    -------
+    pd.Series
+        The selected mapping from the group
+    '''
+    if len(group) == 1:
+        return group.iloc[0]
+    else:
+        cc_breaks = group["am_smarts"].apply(does_break_cc)
+
+        if cc_breaks.all() or not cc_breaks.any():
+            return group.loc[group["rule"].map(rule_cts).idxmax()]
+        else:
+            not_cc = group.loc[~cc_breaks]
+            return not_cc.loc[not_cc["rule"].map(rule_cts).idxmax()]
+        
+def largest_subgraph(group: pd.DataFrame, rule_cts: dict = {}) -> pd.Series:
+    '''
+    Chooses among multiple rules mapped to a reaction that which has
+    the largest subgraph, i.e. the most atoms in the SMARTS pattern
+
+    Args
+    ----
+    group: pd.DataFrame
+        A group of mappings for a single unique reaction. Must contain
+        columns: "reaction_center" referring to the atom indices of all atoms
+        matched to the rule SMARTS template, not the minimal reaction center.
+    rule_cts: dict (Optional)
+        A dictionary mapping rules to their counts in the full dataset
+    Returns
+    -------
+    pd.Series
+        The selected mapping from the group
+    '''
+    if len(group) == 1:
+        return group.iloc[0]
+    
+    subgraph_sizes = group["reaction_center"].apply(lambda x: sum(len(elt) for elt in x[0]))
+    return group.loc[subgraph_sizes.idxmax()]
