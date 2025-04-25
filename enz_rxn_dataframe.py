@@ -24,7 +24,7 @@ def main(uniprot_protein_entries: Path, rhea_smiles: Path, rhea_directions: Path
     enz_df = pd.read_csv(uniprot_protein_entries, sep='\t')
     enz_df = enz_df.rename(columns = {'Entry': 'UniProt_Entry'})
 
-    #Read in Rhea SMARTS and assign appropriate column names
+    #Read in Rhea SMILES and assign appropriate column names
     rxn_smiles_df = pd.read_csv(rhea_smiles, sep='\t', header=None)
     rxn_smiles_df.columns = ['RHEA_ID', 'RXN_SMILES']
 
@@ -50,10 +50,11 @@ def main(uniprot_protein_entries: Path, rhea_smiles: Path, rhea_directions: Path
 
     rxn_smiles_df['REVERSE_ID'] = rxn_smiles_df['UNIQUE_ID'].map(reverse_id_mapping)
 
-    #Create a column that includes ids from all databases used that is appendable for new database entries
+    #Create a column that includes database ids
+    #Append list with other non-Rhea database id entries if needed
     rxn_smiles_df['DB_IDs'] = rxn_smiles_df['RHEA_ID'].apply(lambda x: [f'RHEA:{x}'])
 
-    #Collect RHEA IDs iterating over Uniprot entries (each row)
+    #Collect RHEA IDs iterating over Uniprot entries
     matching_enz_ids = []
     for _, row in enz_df.iterrows():
         catalytic_activity = row['Catalytic activity']
@@ -77,7 +78,7 @@ def main(uniprot_protein_entries: Path, rhea_smiles: Path, rhea_directions: Path
 
     enz_df.drop(columns = ['Catalytic activity', 'ENZYME_ID'], inplace = True)
 
-    #Export dataframs as csv files to interim data folder
+    #Export dataframs as parquet files to interim data folder
     enz_df.to_parquet('/home/kroberts/enz-rxn-data/data/interim/uniprot_rhea/protein_entries.parquet', engine = 'pyarrow', index = False)
     rxn_smiles_df.to_parquet('/home/kroberts/enz-rxn-data/data/interim/uniprot_rhea/reaction_entries.parquet', engine = 'pyarrow', index = False)
 
