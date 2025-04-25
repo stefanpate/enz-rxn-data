@@ -78,7 +78,7 @@ def main(uniprot_protein_entries: Path, rhea_smiles: Path, rhea_directions: Path
 
     enz_df.drop(columns = ['Catalytic activity', 'ENZYME_ID'], inplace = True)
 
-    #Export dataframs as parquet files to interim data folder
+    #Export dataframes as parquet files to interim data folder
     enz_df.to_parquet('/home/kroberts/enz-rxn-data/data/interim/uniprot_rhea/protein_entries.parquet', engine = 'pyarrow', index = False)
     rxn_smiles_df.to_parquet('/home/kroberts/enz-rxn-data/data/interim/uniprot_rhea/reaction_entries.parquet', engine = 'pyarrow', index = False)
 
