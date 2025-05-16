@@ -1,5 +1,7 @@
 defaults:
   - filepaths: filepaths
+  - override hydra/job_logging: custom
+  - override hydra/launcher: quest_cpu
   - _self_
 
 rxn_file: sprhea_240310_v3_mapped_no_subunits.json
@@ -12,3 +14,6 @@ hydra:
     dir: ${filepaths.interim_data}/pathway
   job:
     chdir: True
+  sweep:
+    dir: ${filepaths.interim_data}/pathway
+    subdir: .

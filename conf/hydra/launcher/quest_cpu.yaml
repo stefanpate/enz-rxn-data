@@ -1,0 +1,8 @@
+defaults:
+  - submitit_slurm
+
+timeout_min: 480
+account: b1039
+partition: b1039
+mem_gb: 0
+tasks_per_node: 50
