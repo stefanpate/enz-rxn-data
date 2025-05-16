@@ -174,3 +174,4 @@ data/raw/pathway/sprhea_240310_v3_mapped_no_subunits.json
 submit.sh
 conf/filepaths/filepaths.yaml
 logs/
+nohup*
