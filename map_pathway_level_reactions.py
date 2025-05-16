@@ -33,7 +33,7 @@ def main(cfg: DictConfig):
         )
     
     # Save
-    columns = ["rxn_id", "smarts", "am_smarts", "rule", "reaction_center", "rule_id"] 
+    columns = ["rxn_id", "smarts", "am_smarts", "rule", "template_aidxs", "rule_id"] 
     data = []
     for id, rule, res, rule_id in zip(rxn_ids, rules, results, rule_ids):
         if res.did_map:
