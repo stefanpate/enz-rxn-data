@@ -175,3 +175,6 @@ submit.sh
 conf/filepaths/filepaths.yaml
 logs/
 nohup*
+*.submitit
+*multirun.yaml
+**/.hydra
