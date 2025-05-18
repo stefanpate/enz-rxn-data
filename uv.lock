@@ -219,7 +219,7 @@ requires-dist = [
 [[package]]
 name = "ergochemics"
 version = "0.1.0"
-source = { git = "https://github.com/stefanpate/ergochemics.git#4e37cfbfee4a80f4118906b4bcf3ad9e7ffea07b" }
+source = { git = "https://github.com/stefanpate/ergochemics.git#5e9189a9764f9cc4af51e28ab93f0bdd0a3ae39e" }
 dependencies = [
     { name = "pandas" },
     { name = "pydantic" },
