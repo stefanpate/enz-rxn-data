@@ -2,10 +2,10 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinformed_rules.parquet
+src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_rc_plus_4_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
 resolver:
-  _target_: enz_rxn_data.mapping.largest_subgraph
+  _target_: enz_rxn_data.mapping.most_common_no_cc_break
 
 hydra:
   run:

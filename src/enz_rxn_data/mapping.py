@@ -134,8 +134,8 @@ def largest_subgraph(group: pd.DataFrame, rule_cts: dict = {}) -> pd.Series:
     ----
     group: pd.DataFrame
         A group of mappings for a single unique reaction. Must contain
-        columns: "reaction_center" referring to the atom indices of all atoms
-        matched to the rule SMARTS template, not the minimal reaction center.
+        columns: "template_aidxs" referring to the atom indices of all atoms
+        matched to the rule SMARTS template.
     rule_cts: dict (Optional)
         A dictionary mapping rules to their counts in the full dataset
     Returns
@@ -146,5 +146,5 @@ def largest_subgraph(group: pd.DataFrame, rule_cts: dict = {}) -> pd.Series:
     if len(group) == 1:
         return group.iloc[0]
     
-    subgraph_sizes = group["reaction_center"].apply(lambda x: sum(len(elt) for elt in x[0]))
+    subgraph_sizes = group["template_aidxs"].apply(lambda x: sum(len(elt) for elt in x[0]))
     return group.loc[subgraph_sizes.idxmax()]
