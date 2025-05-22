@@ -2,8 +2,8 @@ hydra:
   run:
     dir: ${filepaths.processed_data}/pathway
   sweep:
-    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
-    subdir: ${hydra.job.num}
+    dir: ${filepaths.processed_data}/pathway
+    subdir: .
   launcher:
     _target_: hydra._internal.core_plugins.basic_launcher.BasicLauncher
   sweeper:
