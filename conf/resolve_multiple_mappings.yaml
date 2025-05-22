@@ -2,7 +2,7 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinformed_rules.parquet
+src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_98_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
 resolver:
   _target_: enz_rxn_data.mapping.largest_subgraph # largest_subgraph | most_common_no_cc_break
@@ -15,3 +15,6 @@ hydra:
   sweep:
     dir: ${filepaths.processed_data}/pathway
     subdir: .
+  sweeper:
+    params:
+      src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_98_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_15_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_6_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_3_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet

@@ -9,7 +9,8 @@ hydra:
   sweeper:
     _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
     max_batch_size: null
-    params: null
+    params:
+      src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_98_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_15_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_6_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_3_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
   help:
     app_name: ${hydra.job.name}
     header: '${hydra.help.app_name} is powered by Hydra.
@@ -104,20 +105,21 @@ hydra:
       - file
     disable_existing_loggers: false
   env: {}
-  mode: RUN
+  mode: MULTIRUN
   searchpath: []
   callbacks: {}
   output_subdir: .hydra
   overrides:
     hydra:
-    - hydra.mode=RUN
-    task: []
+    - hydra.mode=MULTIRUN
+    task:
+    - src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: ''
-    id: ???
-    num: ???
+    override_dirname: src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
+    id: '4'
+    num: 4
     config_name: resolve_multiple_mappings
     env_set: {}
     env_copy: []
