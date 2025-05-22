@@ -138,11 +138,11 @@ hydra:
     - hydra.mode=RUN
     task:
     - rxn_file=sprhea_240310_v3_mapped_no_subunits.json
-    - rule_file=mechinformed_rules.csv
+    - rule_file=mechinferred_dt_2_rules.csv
   job:
     name: map_pathway_level_reactions
     chdir: true
-    override_dirname: rule_file=mechinformed_rules.csv,rxn_file=sprhea_240310_v3_mapped_no_subunits.json
+    override_dirname: rule_file=mechinferred_dt_2_rules.csv,rxn_file=sprhea_240310_v3_mapped_no_subunits.json
     id: ???
     num: ???
     config_name: map_pathway_level_reactions
