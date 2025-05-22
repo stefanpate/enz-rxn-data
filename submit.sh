@@ -4,7 +4,7 @@
 #SBATCH -N 1
 #SBATCH -n 50
 #SBATCH --mem=0
-#SBATCH -t 48:00:00
+#SBATCH -t 5:00:00
 #SBATCH --job-name="map_rxns"
 #SBATCH --output=/home/spn1560/enz-rxn-data/logs/out/%A
 #SBATCH --error=/home/spn1560/enz-rxn-data/logs/error/%A
@@ -15,7 +15,7 @@
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=sprhea_240310_v3_mapped_no_subunits.json
-rule=rc_plus_1_rules.csv
+rule=mechinformed_rules.csv
 
 # Commands
 ulimit -c 0
