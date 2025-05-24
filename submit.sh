@@ -15,7 +15,7 @@
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=sprhea_240310_v3_mapped_no_subunits.json
-rule=mechinferred_dt_2_rules.csv
+rule=imt_rules.csv
 
 # Commands
 ulimit -c 0
