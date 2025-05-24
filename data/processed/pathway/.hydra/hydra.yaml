@@ -105,21 +105,20 @@ hydra:
       - file
     disable_existing_loggers: false
   env: {}
-  mode: MULTIRUN
+  mode: RUN
   searchpath: []
   callbacks: {}
   output_subdir: .hydra
   overrides:
     hydra:
-    - hydra.mode=MULTIRUN
-    task:
-    - src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
+    - hydra.mode=RUN
+    task: []
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
-    id: '4'
-    num: 4
+    override_dirname: ''
+    id: ???
+    num: ???
     config_name: resolve_multiple_mappings
     env_set: {}
     env_copy: []
