@@ -2,6 +2,7 @@ from rdkit import Chem
 import numpy as np
 import pandas as pd
 from collections import Counter
+from ergochemics.mapping import extract_operator_patts
 
 def get_bond_matrix(side: list[Chem.Mol], n_atoms: int) -> tuple[np.ndarray, dict[int, str]]:
     '''
@@ -93,14 +94,29 @@ def does_break_cc(rxn: str) -> bool:
     bond_cts = count_bond_changes(rxn)
     return bond_cts[("CC", 1.0, 0.0)] > 0
 
+def has_intramol_breaks(rule: str) -> bool:
+    '''
+   Check if rule has '.' notation that leaves
+   out parts of a molecule.
+    '''
+    lhs, rhs = extract_operator_patts(rule)
+
+    for elt in lhs:
+        if "." in elt:
+            return True
+    for elt in rhs:
+        if "." in elt:
+            return True
+    return False
+
 '''
 Multiple mapping resolvers
 '''
 
-def most_common_no_cc_break(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
+def min_rule_resolver(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
     '''
-    Chooses one rule-rxn mapping from among several based on what is the most
-    common, first preferring rules that don't call for breaking a CC bond
+    First looks for rules w/o intramolecular breaks, then looks for 
+    rules that don't break C-C bonds, then chooses the most common rule.
 
     Args
     ----
@@ -117,12 +133,19 @@ def most_common_no_cc_break(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
     if len(group) == 1:
         return group.iloc[0]
     else:
+        intramol_breaks = group["rule"].apply(has_intramol_breaks)
+
+        # If a subset are specific, use those, proceed to cc break check
+        # otherwise, resort to those with intramolecular breaks
+        if intramol_breaks.any() and not intramol_breaks.all():
+            group = group.loc[~intramol_breaks]
+
         cc_breaks = group["am_smarts"].apply(does_break_cc)
 
-        if cc_breaks.all() or not cc_breaks.any():
+        if cc_breaks.all() or not cc_breaks.any(): # If all or none break cc, doesn't matter, use counts
             return group.loc[group["rule"].map(rule_cts).idxmax()]
         else:
-            not_cc = group.loc[~cc_breaks]
+            not_cc = group.loc[~cc_breaks] # If a subset break cc, use those that don't
             return not_cc.loc[not_cc["rule"].map(rule_cts).idxmax()]
         
 def largest_subgraph(group: pd.DataFrame, rule_cts: dict = {}) -> pd.Series:
@@ -136,7 +159,7 @@ def largest_subgraph(group: pd.DataFrame, rule_cts: dict = {}) -> pd.Series:
         A group of mappings for a single unique reaction. Must contain
         columns: "template_aidxs" referring to the atom indices of all atoms
         matched to the rule SMARTS template.
-    rule_cts: dict (Optional)
+    rule_cts: dict (For compatibility)
         A dictionary mapping rules to their counts in the full dataset
     Returns
     -------
