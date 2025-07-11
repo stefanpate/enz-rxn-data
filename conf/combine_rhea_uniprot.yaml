@@ -1,0 +1,17 @@
+defaults:
+  - filepaths: filepaths
+  - _self_
+
+uniprot_fn: uniprotkb_reviewed_true_2025_04_01.tsv
+uniprot: ${filepaths.raw_data}/pathway/${uniprot_fn} # Path to the tsv file containing reviewed protein entries from UniProt
+rhea_smiles: ${filepaths.raw_data}/pathway/rhea-reaction-smiles.tsv # Path to the tsv file containing reaction SMILES from Rhea
+rhea_directions: ${filepaths.raw_data}/pathway/rhea-directions.tsv # Path to the tsv file containing reaction directions from Rhea
+chebi2name: ${filepaths.raw_data}/pathway/chebiId_name.tsv # Path to the tsv file containing ChEBI compound names
+chebi2smiles: ${filepaths.raw_data}/pathway/rhea-chebi-smiles.tsv # Path to the tsv file containing ChEBI compound SMILES
+rm_stereo: True
+
+hydra:
+  run:
+    dir: ${filepaths.processed_data}/pathway
+  job:
+    chdir: True

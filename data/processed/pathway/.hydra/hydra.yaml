@@ -2,15 +2,14 @@ hydra:
   run:
     dir: ${filepaths.processed_data}/pathway
   sweep:
-    dir: ${filepaths.processed_data}/pathway
-    subdir: .
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
   launcher:
     _target_: hydra._internal.core_plugins.basic_launcher.BasicLauncher
   sweeper:
     _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
     max_batch_size: null
-    params:
-      src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_98_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_15_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_6_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_3_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
+    params: null
   help:
     app_name: ${hydra.job.name}
     header: '${hydra.help.app_name} is powered by Hydra.
@@ -112,15 +111,14 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task:
-    - src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_rc_plus_0_rules.parquet
+    task: []
   job:
-    name: resolve_multiple_mappings
+    name: combine_rhea_uniprot
     chdir: true
-    override_dirname: src_file=mappings_sprhea_240310_v3_mapped_no_subunits_x_rc_plus_0_rules.parquet
+    override_dirname: ''
     id: ???
     num: ???
-    config_name: resolve_multiple_mappings
+    config_name: combine_rhea_uniprot
     env_set: {}
     env_copy: []
     config:

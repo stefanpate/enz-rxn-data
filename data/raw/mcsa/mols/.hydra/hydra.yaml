@@ -113,12 +113,12 @@ hydra:
     - hydra.mode=RUN
     task: []
   job:
-    name: fill_missing_mcsa_mols
+    name: combine_rhea_uniprot
     chdir: true
     override_dirname: ''
     id: ???
     num: ???
-    config_name: fill_mcsa_mols
+    config_name: combine_rhea_uniprot
     env_set: {}
     env_copy: []
     config:

@@ -177,3 +177,4 @@ nohup*
 *.submitit
 *multirun.yaml
 **/.hydra
+data/raw/pathway/uniprotkb*.tsv
