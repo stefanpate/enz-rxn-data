@@ -4,9 +4,9 @@ defaults:
   - override hydra/launcher: quest_cpu
   - _self_
 
-rxn_file: sprhea_240310_v3_mapped_no_subunits.json
+rxn_file: known_reactions.parquet
 rule_file: rc_plus_0_rules.csv
-rxn_path: ${filepaths.raw_data}/pathway/${.rxn_file}
+rxn_path: ${filepaths.processed_data}/pathway/${.rxn_file}
 rule_path: ${filepaths.rules}/${.rule_file}
 
 hydra:

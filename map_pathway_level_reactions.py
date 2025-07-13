@@ -3,7 +3,6 @@ from omegaconf import DictConfig
 from ergochemics.mapping import operator_map_reaction, rc_to_str
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-import json
 from tqdm import tqdm
 import pandas as pd
 from itertools import product
@@ -11,16 +10,14 @@ from itertools import product
 @hydra.main(version_base=None, config_path="conf", config_name="map_pathway_level_reactions")
 def main(cfg: DictConfig):
 
-    # Load reactions
-    with open(Path(cfg.rxn_path), 'r') as f: # TODO: Change file type handling when change to new pull
-        reactions = json.load(f)
+    reactions = pd.read_parquet(Path(cfg.rxn_path))
 
     # Load rules
     rules = pd.read_csv(Path(cfg.rule_path), sep=",", index_col=0)
     chunksize = len(rules)
 
-    rxn_rule_cart_prod = product(reactions.keys(), rules.index)
-    tasks = [(k, reactions[k]['smarts'], rule_id, rules.loc[rule_id, "smarts"]) for k, rule_id in rxn_rule_cart_prod]
+    rxn_rule_cart_prod = product(reactions.index, rules.index)
+    tasks = [(k, reactions.loc[k, 'smarts'], rule_id, rules.loc[rule_id, "smarts"]) for k, rule_id in rxn_rule_cart_prod]
     rxn_ids, rxns, rule_ids, rules = zip(*tasks)
     
     # Map

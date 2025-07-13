@@ -14,7 +14,6 @@ from rdkit import Chem
 
 log = logging.getLogger(__name__)
 
-
 @hydra.main(version_base=None, config_path="./conf", config_name="combine_rhea_uniprot")
 def main(cfg: DictConfig):
     '''

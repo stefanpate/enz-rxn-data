@@ -136,13 +136,11 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task:
-    - rxn_file=sprhea_240310_v3_mapped_no_subunits.json
-    - rule_file=imt_rules.csv
+    task: []
   job:
     name: map_pathway_level_reactions
     chdir: true
-    override_dirname: rule_file=imt_rules.csv,rxn_file=sprhea_240310_v3_mapped_no_subunits.json
+    override_dirname: ''
     id: ???
     num: ???
     config_name: map_pathway_level_reactions
@@ -156,18 +154,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /gpfs/home/spn1560/enz-rxn-data
+    cwd: /home/stef/enz_rxn_data
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /gpfs/home/spn1560/enz-rxn-data/conf
+    - path: /home/stef/enz_rxn_data/conf
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/spn1560/enz-rxn-data/data/interim/pathway
+    output_dir: /home/stef/enz_rxn_data/data/interim/pathway
     choices:
       filepaths: filepaths
       hydra/env: default
