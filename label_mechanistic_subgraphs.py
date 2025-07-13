@@ -197,7 +197,7 @@ def main(cfg: DictConfig):
                 log.info(f"Entry {(entry_id, mech['mechanism_id'])} is not strictly balanced")
                 continue
 
-            # TODO: Figure out strict limit on atom map numbers thing. See notepad
+            # TODO: Figure out strict limit on atom map numbers (rdkit)
             try:
                 # ignoreAtomMapNumbers option required on lhs to canonicalize SMILES in a way that doesn't depend on atom map numbers
                 smarts = ".".join([Chem.MolToSmiles(mol, ignoreAtomMapNumbers=True) for mol in overall_lhs]) + ">>" +\

@@ -80,7 +80,7 @@ def extract_mols(entries: dict, key_path: list[str]) -> dict[str]:
     return mols
 
 cp = str(Path(__file__).parent / "conf")
-@hydra.main(version_base=None, config_path=cp, config_name="mcsa_pull")
+@hydra.main(version_base=None, config_path=cp, config_name="download_mcsa")
 def main(cfg: DictConfig):
     batch_num = 0
     next_url = cfg.url

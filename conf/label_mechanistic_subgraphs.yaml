@@ -3,7 +3,6 @@ defaults:
   - _self_
 
 entry_batches: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-chebi_mols_path: ${filepaths.raw_data}/ChEBI_lite_3star.sdf
 
 hydra:
   run:

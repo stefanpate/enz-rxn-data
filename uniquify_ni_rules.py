@@ -17,11 +17,19 @@ def main(cfg: DictConfig):
         data=[(i, smarts, ni_sma_id[smarts]) for i, smarts in enumerate(unique_rules)],
         columns=["id", "smarts", "ni_ids"]
     )
-    unique_rules.to_csv(
-        f"{"_".join(Path(cfg.src_file).stem.split('_')[1:])}.csv",
-        sep=",",
-        index=False
-    )
+
+    if cfg.src_file == "ni_min_rules.tsv":
+        unique_rules.to_csv(
+            "rc_plus_0_rules.csv",
+            sep=",",
+            index=False
+        )
+    else:
+        unique_rules.to_csv(
+            f"{"_".join(Path(cfg.src_file).stem.split('_')[1:])}.csv",
+            sep=",",
+            index=False
+        )
 
 if __name__ == "__main__":
     main()

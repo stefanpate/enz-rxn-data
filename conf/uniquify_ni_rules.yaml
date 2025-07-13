@@ -2,7 +2,7 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-src_file: ni_imt_rules.tsv
+src_file: ni_imt_rules.tsv # ni_imt_rules.tsv | ni_min_rules.tsv
 
 hydra:
   run:
