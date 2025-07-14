@@ -113,11 +113,11 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
-    - src_file=mappings_known_reactions_x_rc_plus_0_rules.parquet
+    - src_file=mappings_known_reactions_x_mechinformed_rules.parquet
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: src_file=mappings_known_reactions_x_rc_plus_0_rules.parquet
+    override_dirname: src_file=mappings_known_reactions_x_mechinformed_rules.parquet
     id: ???
     num: ???
     config_name: resolve_multiple_mappings

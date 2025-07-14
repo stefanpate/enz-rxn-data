@@ -10,6 +10,6 @@ filepaths:
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
 rxn_file: known_reactions.parquet
-rule_file: rc_plus_0_rules.csv
+rule_file: mechinformed_rules.csv
 rxn_path: ${filepaths.processed_data}/pathway/${.rxn_file}
 rule_path: ${filepaths.rules}/${.rule_file}
