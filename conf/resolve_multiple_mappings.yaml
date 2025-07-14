@@ -5,7 +5,7 @@ defaults:
 src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_imt_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
 resolver:
-  _target_: enz_rxn_data.mapping.min_rule_resolver # largest_subgraph | min_rule_resolver
+  _target_: enz_rxn_data.mapping.largest_subgraph # largest_subgraph | min_rule_resolver
 
 hydra:
   run:
