@@ -10,8 +10,9 @@ uv python install 3.13 # Install uv
 git clone git@github.com:stefanpate/enz-rxn-data.git
 cd enz-rxn-data
 uv sync
-# Set conf/filepaths/filepaths.yaml field "repo" to repo location
 ```
+
+Set conf/filepaths/filepaths.yaml field "repo" to your repo location.
 
 ## Usage
 
@@ -56,7 +57,7 @@ python combine_rhea_uniprot.py
 1. Put rules in artifacts/rules in a csv with required columns id | smarts
 
 ```bash
-python map_pathway_level_reactions.py rule_file=your_rules.csv
+python map_pathway_level_reactions.py rule_file=rules.csv
 ```
 
 Since n_rxns * n_rules may be large, it's recommended you run this somewhere with a lot of cpus available. This will output a file mappings_rxns_x_rules.parquet. There may be multiple rules mapped to a reaction.
@@ -64,6 +65,6 @@ Since n_rxns * n_rules may be large, it's recommended you run this somewhere wit
 2. To make the mappings 1-to-1, there is a script available that takes a "resolver" where you can implemente your preferred logic. Customize the associated config file to do so.
 
 ```bash
-python resolve_multiple_mappings.py
+python resolve_multiple_mappings.py src_file=mappings_rxns_x_rules.csv
 ```
 This will finally give you a mapped_rxns_x_rules.parquet file
