@@ -12,7 +12,7 @@ def task_generator(reactions, rules):
         for j, rule in rules.iterrows():
             yield (rxn.id, rxn.smarts, rule.id, rule.smarts)
 
-def process_in_batches(tasks_gen, batch_size=1000, max_workers=None):
+def process_in_batches(tasks_gen, batch_size=1000, max_workers=None, chunk_size=50):
     """Process tasks in batches to control memory usage"""
     all_results = []
     batch_count = 0
@@ -25,35 +25,26 @@ def process_in_batches(tasks_gen, batch_size=1000, max_workers=None):
             
             # Process batch when it reaches the specified size
             if len(batch) >= batch_size:
-                batch_results = process_batch(executor, batch, batch_count)
+                batch_results = process_batch(executor, batch, batch_count, chunk_size)
                 all_results.extend(batch_results)
                 batch = []
                 batch_count += 1
         
         # Process any remaining tasks in the final batch
         if batch:
-            batch_results = process_batch(executor, batch, batch_count)
+            batch_results = process_batch(executor, batch, batch_count, chunk_size)
             all_results.extend(batch_results)
     
     return all_results
 
-def process_batch(executor, batch, batch_num):
-    """Process a single batch of tasks"""
-    print(f"Processing batch {batch_num + 1} with {len(batch)} tasks...")
-    
-    # Submit all tasks in the batch
-    futures = []
-    for rxn_id, rxn_smarts, rule_id, rule_smarts in batch:
-        future = executor.submit(operator_map_reaction, rxn_smarts, rule_smarts)
-        futures.append((future, rxn_id, rule_id, rule_smarts))
-    
-    # Collect results as they complete
-    batch_results = []
-    for future, rxn_id, rule_id, rule_smarts in tqdm(futures, desc=f"Batch {batch_num + 1}"):
+def process_task_chunk(task_chunk):
+    """Process a chunk of tasks in a single worker"""
+    chunk_results = []
+    for rxn_id, rxn_smarts, rule_id, rule_smarts in task_chunk:
         try:
-            result = future.result()
+            result = operator_map_reaction(rxn_smarts, rule_smarts)
             if result.did_map:
-                batch_results.append([
+                chunk_results.append([
                     rxn_id, 
                     result.aligned_smarts, 
                     result.atom_mapped_smarts, 
@@ -63,6 +54,31 @@ def process_batch(executor, batch, batch_num):
                 ])
         except Exception as e:
             print(f"Error processing task {rxn_id}, {rule_id}: {e}")
+            continue
+    return chunk_results
+
+def process_batch(executor, batch, batch_num, chunk_size=50):
+    """Process a single batch of tasks using chunking"""
+    print(f"Processing batch {batch_num + 1} with {len(batch)} tasks...")
+    
+    # Split batch into chunks for workers
+    chunks = [batch[i:i + chunk_size] for i in range(0, len(batch), chunk_size)]
+    print(f"Split into {len(chunks)} chunks of ~{chunk_size} tasks each")
+    
+    # Submit chunks to workers
+    futures = []
+    for chunk in chunks:
+        future = executor.submit(process_task_chunk, chunk)
+        futures.append(future)
+    
+    # Collect results as they complete
+    batch_results = []
+    for future in tqdm(futures, desc=f"Batch {batch_num + 1} chunks"):
+        try:
+            chunk_results = future.result()
+            batch_results.extend(chunk_results)
+        except Exception as e:
+            print(f"Error processing chunk: {e}")
             continue
     
     print(f"Batch {batch_num + 1} completed with {len(batch_results)} successful mappings")
@@ -83,7 +99,12 @@ def main(cfg: DictConfig):
     tasks_gen = task_generator(reactions, rules)
     
     # Process in batches to control memory usage
-    all_results = process_in_batches(tasks_gen, batch_size=cfg.batch_size)
+    all_results = process_in_batches(
+        tasks_gen, 
+        batch_size=cfg.batch_size, 
+        max_workers=cfg.get('max_workers', 50),
+        chunk_size=cfg.get('chunk_size', 50)
+    )
     
     # Create final DataFrame and save
     columns = ["rxn_id", "smarts", "am_smarts", "rule", "template_aidxs", "rule_id"]

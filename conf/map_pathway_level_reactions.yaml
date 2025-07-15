@@ -8,7 +8,9 @@ rxn_file: known_reactions.parquet
 rule_file: mechinformed_rules.csv
 rxn_path: ${filepaths.processed_data}/pathway/${.rxn_file}
 rule_path: ${filepaths.rules}/${.rule_file}
-batch_size: 10000
+batch_size: 50000
+max_workers: 50
+chunk_size: 100
 
 hydra:
   run:
