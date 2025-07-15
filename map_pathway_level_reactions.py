@@ -87,10 +87,10 @@ def process_batch(executor, batch, batch_num, chunk_size=50):
 @hydra.main(version_base=None, config_path="conf", config_name="map_pathway_level_reactions")
 def main(cfg: DictConfig):
 
-    reactions = pd.read_parquet(Path(cfg.rxn_path))[:2000]
+    reactions = pd.read_parquet(Path(cfg.rxn_path))
 
     # Load rules
-    rules = pd.read_csv(Path(cfg.rule_path), sep=",")[:100]
+    rules = pd.read_csv(Path(cfg.rule_path), sep=",")
     
     print(f"Processing {len(reactions)} reactions against {len(rules)} rules")
     print(f"Total combinations: {len(reactions) * len(rules):,}")
