@@ -8,11 +8,9 @@ import pandas as pd
 
 def task_generator(reactions, rules):
     """Generator that yields tasks without storing them all in memory"""
-    for rxn_id in reactions.index:
-        rxn_smarts = reactions.loc[rxn_id, 'smarts']
-        for rule_id in rules.index:
-            rule_smarts = rules.loc[rule_id, "smarts"]
-            yield (rxn_id, rxn_smarts, rule_id, rule_smarts)
+    for i, rxn in reactions.iterrows():
+        for j, rule in rules.iterrows():
+            yield (rxn.id, rxn.smarts, rule.id, rule.smarts)
 
 def process_in_batches(tasks_gen, batch_size=1000, max_workers=None):
     """Process tasks in batches to control memory usage"""
@@ -73,10 +71,10 @@ def process_batch(executor, batch, batch_num):
 @hydra.main(version_base=None, config_path="conf", config_name="map_pathway_level_reactions")
 def main(cfg: DictConfig):
 
-    reactions = pd.read_parquet(Path(cfg.rxn_path))
+    reactions = pd.read_parquet(Path(cfg.rxn_path))[:2000]
 
     # Load rules
-    rules = pd.read_csv(Path(cfg.rule_path), sep=",", index_col=0)
+    rules = pd.read_csv(Path(cfg.rule_path), sep=",")[:100]
     
     print(f"Processing {len(reactions)} reactions against {len(rules)} rules")
     print(f"Total combinations: {len(reactions) * len(rules):,}")
@@ -85,7 +83,7 @@ def main(cfg: DictConfig):
     tasks_gen = task_generator(reactions, rules)
     
     # Process in batches to control memory usage
-    all_results = process_in_batches(tasks_gen, batch_size=1000)
+    all_results = process_in_batches(tasks_gen, batch_size=cfg.batch_size)
     
     # Create final DataFrame and save
     columns = ["rxn_id", "smarts", "am_smarts", "rule", "template_aidxs", "rule_id"]
