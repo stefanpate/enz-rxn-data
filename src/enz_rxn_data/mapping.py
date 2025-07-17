@@ -113,7 +113,7 @@ def has_intramol_breaks(rule: str) -> bool:
 Multiple mapping resolvers
 '''
 
-def min_rule_resolver(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
+def min_rule(group: pd.DataFrame, rule_cts: dict) -> pd.Series:
     '''
     First looks for rules w/o intramolecular breaks, then looks for 
     rules that don't break C-C bonds, then chooses the most common rule.

@@ -15,7 +15,7 @@ def main(cfg: DictConfig):
     selected = []
     for _, group in full.groupby("rxn_id"):
         selected.append(
-            call(cfg.resolver, group, rule_cts)
+            call(cfg.mapping_resolver, group, rule_cts)
         )
     
     selected = pd.DataFrame(selected, columns=full.columns)

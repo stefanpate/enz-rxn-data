@@ -62,9 +62,9 @@ python map_pathway_level_reactions.py rule_file=rules.csv
 
 Since n_rxns * n_rules may be large, it's recommended you run this somewhere with a lot of cpus available. This will output a file mappings_rxns_x_rules.parquet. There may be multiple rules mapped to a reaction.
 
-2. To make the mappings 1-to-1, there is a script available that takes a "resolver" where you can implemente your preferred logic. Customize the associated config file to do so.
+2. To make the mappings 1-to-1, choose a "resolver" and run it on your mappings file. There are two resolvers implemented in src/enz_rxn_data/mapping.py and available in config files in conf/mapping_resolver. You can select these via the command line with hydra or edit the resolve_multiple_mappings.yaml config file directly.
 
 ```bash
-python resolve_multiple_mappings.py src_file=mappings_rxns_x_rules.csv
+python resolve_multiple_mappings.py src_file=mappings_rxns_x_rules.parquet mapping_resolver=largest_subgraph
 ```
 This will finally give you a mapped_rxns_x_rules.parquet file
