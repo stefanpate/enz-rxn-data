@@ -179,7 +179,7 @@ def main(cfg: DictConfig):
         {
             "id": [i for i in range(len(smiles2names))],
             "smiles": smiles2names["SMILES"],
-            "name": smiles2names["NAME"],
+            "name": smiles2names["NAME"].apply(lambda x: x.strip()),
             "chebi_id": smiles2names["CHEBI_ID"],
             "n_atoms": smiles2names["SMILES"].apply(lambda x: Chem.MolFromSmiles(x).GetNumAtoms()),
         },
