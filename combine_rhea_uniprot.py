@@ -5,12 +5,13 @@ import re
 import hydra
 from omegaconf import DictConfig
 from tqdm import tqdm
-from ergochemics.standardize import standardize_smiles
+from ergochemics.standardize import standardize_smiles, hash_compound, hash_reaction
 from functools import lru_cache
 from itertools import chain
 import logging
 from src.schemas import known_compounds_schema, enzymes_schema, known_reactions_schema
 from rdkit import Chem
+from collections import defaultdict
 
 log = logging.getLogger(__name__)
 
@@ -109,22 +110,19 @@ def main(cfg: DictConfig):
 
     # Collect RHEA IDs iterating over Uniprot entries
     log.info("Merging rhea and uniprot entries...")
-    matching_enz_ids = set()
+    matching_enz_ids = defaultdict(set)
     for _, row in tqdm(enz_df.iterrows(), total=len(enz_df)):
         catalytic_activity = row['Catalytic activity']
         uniprot_entry = row['UniProt_Entry']
         if isinstance(catalytic_activity, str):
             match = re.findall(r'RHEA:(\d{1,6})', catalytic_activity)
             for rhea_id in match:
-                matching_enz_ids.add((any_rhea_to_working_idx[int(rhea_id)], uniprot_entry))
+                matching_enz_ids[any_rhea_to_working_idx[int(rhea_id)]].add(uniprot_entry)
     
-    log.info(f"Found {len(matching_enz_ids)} enzyme-reaction pairs in Uniprot entries.")
-    matching_entries_df = pd.DataFrame(matching_enz_ids, columns=['WORKING_IDX', 'ENZYME_ID'])
-    rxn_match_df = matching_entries_df.groupby('WORKING_IDX')['ENZYME_ID'].apply(list).reset_index()
-
-    # Add enzyme IDs to the reaction dataframe and add the reaction IDs to the enzyme dataframe
-    rxn_smiles_df = rxn_smiles_df.join(rxn_match_df, on='WORKING_IDX', how='left', rsuffix='_match')
-    enz_df = enz_df[enz_df["UniProt_Entry"].isin(matching_entries_df["ENZYME_ID"].unique())] # Just keep enzymes that have reactions
+    log.info(f"Found {sum(len(v) for v in matching_enz_ids.values())} enzyme-reaction pairs in Uniprot entries.")
+    rxn_smiles_df['ENZYME_ID'] = rxn_smiles_df['WORKING_IDX'].apply(lambda x: list(matching_enz_ids[x]) if x in matching_enz_ids else [])
+    all_matched_enz_ids = set(chain(*[v for v in matching_enz_ids.values()]))
+    enz_df = enz_df[enz_df["UniProt_Entry"].isin(all_matched_enz_ids)] # Just keep enzymes that have reactions
 
     # Fold up redundant smiles, e.g., had differed by stereochemistry
     rxn_smiles_df = rxn_smiles_df.groupby("RXN_SMILES").agg(
@@ -135,7 +133,7 @@ def main(cfg: DictConfig):
     ).reset_index()
     rxn_smiles_df["REV_RXN_SMILES"] = rxn_smiles_df["RXN_SMILES"].apply(lambda x: ">>".join(x.split(">>")[::-1]))
     rxn_smiles_df = rxn_smiles_df[rxn_smiles_df["RXN_SMILES"] != rxn_smiles_df["REV_RXN_SMILES"]] # Drop non-reactions, e.g., epimerization, transport
-    rxn_smiles_df["UNIQUE_ID"] = rxn_smiles_df.index
+    rxn_smiles_df["UNIQUE_ID"] = rxn_smiles_df["RXN_SMILES"].apply(hash_reaction)
     rxn_smiles_df["REVERSE_ID"] = rxn_smiles_df["REV_RXN_SMILES"].apply(lambda x: rxn_smiles_df.loc[rxn_smiles_df["RXN_SMILES"] == x, "UNIQUE_ID"].values[0])
     
     # Leave room to grow into other databases beyond rhea
@@ -177,7 +175,7 @@ def main(cfg: DictConfig):
 
     known_compounds = pl.DataFrame(
         {
-            "id": [i for i in range(len(smiles2names))],
+            "id": smiles2names["SMILES"].apply(hash_compound),
             "smiles": smiles2names["SMILES"],
             "name": smiles2names["NAME"].apply(lambda x: x.strip()),
             "chebi_id": smiles2names["CHEBI_ID"],

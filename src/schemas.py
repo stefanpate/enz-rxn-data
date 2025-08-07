@@ -2,7 +2,7 @@ import polars as pl
 
 known_compounds_schema = pl.Schema(
     {
-        "id": pl.Int32,
+        "id": pl.String,
         "smiles": pl.String,
         "name": pl.String,
         "chebi_id": pl.String,
@@ -41,10 +41,10 @@ enzymes_schema = pl.Schema(
 
 known_reactions_schema = pl.Schema(
         {
-        "id": pl.Int32,
+        "id": pl.String,
         "smarts": pl.String,
         "enzymes": pl.List(pl.String),
-        "reverse": pl.Int32,
+        "reverse": pl.String,
         "db_ids": pl.List(pl.String),
     }
 )
