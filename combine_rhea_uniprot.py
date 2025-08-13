@@ -9,7 +9,7 @@ from ergochemics.standardize import standardize_smiles, hash_compound, hash_reac
 from functools import lru_cache
 from itertools import chain
 import logging
-from src.schemas import known_compounds_schema, enzymes_schema, known_reactions_schema
+from enz_rxn_data.schemas import known_compounds_schema, enzymes_schema, known_reactions_schema
 from rdkit import Chem
 from collections import defaultdict
 
