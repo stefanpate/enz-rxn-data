@@ -12,22 +12,20 @@ cd enz-rxn-data
 uv sync
 ```
 
-Set conf/filepaths/filepaths.yaml field "repo" to your repo location.
+Set `conf/filepaths/filepaths.yaml` field "repo" to your repo location.
 
 ## Usage
 
 ### M-CSA
 
-1. download_mcsa.py: downloads entries from Mechanistic and Catalytic Site Atlas
-2. label_mechanistic_subgraphs.py: converts CML-encoded mechanisms into SMARTS and labels atoms involved in the mechanism
-3. distill_mech_labeled_reactions.py: extracts overall reactants and products (not residues or cofactors), balances reaction and reverses it
-
-Usage: 
+1. `download_mcsa.py`: downloads entries from Mechanistic and Catalytic Site Atlas
+2. `label_mechanistic_subgraphs.py`: converts CML-encoded mechanisms into SMARTS and labels atoms involved in the mechanism
+3. `distill_mech_labeled_reactions.py`: extracts overall reactants and products (not residues or cofactors), balances reaction and reverses it
 
 ```bash
 python download_mcsa.py
 python label_mechanistic_subgraphs.py
-python distill_mech_labled_reactions.py
+python distill_mech_labeled_reactions.py
 ```
 
 ### Pathway-level enzymatic reactions
@@ -40,31 +38,32 @@ curl -o uniprot_reviewed.tsv.gz "https://rest.uniprot.org/uniprotkb/stream?compr
 gunzip uniprot_reviewed.tsv.gz
 ```
 
-2. Download reaction files from [Rhea](https://www.rhea-db.org/help/download) to data/raw/pathway
+2. Download reaction files from [Rhea](https://www.rhea-db.org/help/download) to `data/raw/pathway`:
 - `rhea-reaction-smiles.tsv`
 - `rhea-directions.tsv`
 - `rhea2ec.tsv`
 - `rhea-chebi-smiles.tsv`
 - `chebiId_name.tsv`
 
-3. Run combine_rhea_uniprot.py: Outputs parquet files for known reactions, enzymes and compounds. Reaction and molecule SMILES are standardized
+3. Run `combine_rhea_uniprot.py`: Outputs parquet files for known reactions, enzymes and compounds. Reaction and molecule SMILES are standardized
 
 ```bash
 python combine_rhea_uniprot.py
 ```
 
 ### Mapping rules to reactions
-1. Put rules in artifacts/rules in a csv with required columns id | smarts
+1. Put rules in `artifacts/rules` in a CSV file with required columns: `id`, `smarts`
 
 ```bash
 python map_pathway_level_reactions.py rule_file=rules.csv
 ```
 
-Since n_rxns * n_rules may be large, it's recommended you run this somewhere with a lot of cpus available. This will output a file mappings_rxns_x_rules.parquet. There may be multiple rules mapped to a reaction.
+Since `n_rxns * n_rules` may be large, it's recommended you run this somewhere with a lot of CPUs available. This will output a file `mappings_rxns_x_rules.parquet`. There may be multiple rules mapped to a reaction.
 
-2. To make the mappings 1-to-1, choose a "resolver" and run it on your mappings file. There are two resolvers implemented in src/enz_rxn_data/mapping.py and available in config files in conf/mapping_resolver. You can select these via the command line with hydra or edit the resolve_multiple_mappings.yaml config file directly.
+2. To make the mappings 1-to-1, choose a resolver and run it on your mappings file. There are two resolvers implemented in `src/enz_rxn_data/mapping.py` and available in config files in `conf/resolve_multiple_mappings.yaml`. You can select these via the command line with Hydra or edit the `resolve_multiple_mappings.yaml` config file directly.
 
 ```bash
-python resolve_multiple_mappings.py src_file=mappings_rxns_x_rules.parquet mapping_resolver=largest_subgraph
+python resolve_multiple_mappings.py src_file=mappings_rxns_x_rules.parquet resolver._target_=enz_rxn_data.mapping.largest_subgraph
 ```
-This will finally give you a mapped_rxns_x_rules.parquet file
+
+This will finally give you a `mapped_rxns_x_rules.parquet` file.

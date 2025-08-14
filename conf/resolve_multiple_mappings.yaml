@@ -1,6 +1,6 @@
 defaults:
   - filepaths: filepaths
-  - mapping_resolver: min_rule
+  - mapping_resolver: largest_subgraph
   - _self_
 
 src_file: mappings_known_reactions_x_rc_plus_0_rules.parquet
@@ -16,4 +16,4 @@ hydra:
     subdir: .
   sweeper:
     params:
-      src_file: mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_98_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_15_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_6_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_3_rules.parquet,mappings_sprhea_240310_v3_mapped_no_subunits_x_mechinferred_dt_2_rules.parquet
+      src_file: mappings_known_reactions_x_rc_plus_1_rules.parquet,mappings_known_reactions_x_rc_plus_2_rules.parquet,mappings_known_reactions_x_rc_plus_3_rules.parquet,mappings_known_reactions_x_rc_plus_4_rules.parquet,mappings_known_reactions_x_mechinferred_dt_01_rules.parquet,mappings_known_reactions_x_mechinferred_dt_02_rules.parquet,mappings_known_reactions_x_mechinferred_dt_04_rules.parquet,mappings_known_reactions_x_mechinferred_dt_13_rules.parquet,mappings_known_reactions_x_mechinferred_dt_91_rules.parquet
