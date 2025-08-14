@@ -15,7 +15,7 @@
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions.parquet
-rule=mechinferred_dt_91_rules.csv
+rule=imt_rules.csv
 
 # Commands
 ulimit -c 0
