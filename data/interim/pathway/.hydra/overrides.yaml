@@ -1,1 +1,2 @@
-[]
+- rxn_file=known_reactions.parquet
+- rule_file=mechinferred_dt_91_rules.csv

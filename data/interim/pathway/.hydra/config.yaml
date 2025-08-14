@@ -1,5 +1,5 @@
 filepaths:
-  repo: /home/stef/enz_rxn_data
+  repo: /home/spn1560/enz-rxn-data
   data: ${.repo}/data
   artifacts: ${.repo}/artifacts
   raw_data: ${.data}/raw
@@ -10,7 +10,9 @@ filepaths:
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
 rxn_file: known_reactions.parquet
-rule_file: mechinformed_rules.csv
+rule_file: mechinferred_dt_91_rules.csv
 rxn_path: ${filepaths.processed_data}/pathway/${.rxn_file}
 rule_path: ${filepaths.rules}/${.rule_file}
-batch_size: 10000
+batch_size: 50000
+max_workers: 50
+chunk_size: 100

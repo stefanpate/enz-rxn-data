@@ -5,7 +5,7 @@
 #SBATCH -n 50
 #SBATCH --mem=0
 #SBATCH -t 48:00:00
-#SBATCH --job-name="map_rxns"
+#SBATCH --job-name="map"
 #SBATCH --output=/home/spn1560/enz-rxn-data/logs/out/%A
 #SBATCH --error=/home/spn1560/enz-rxn-data/logs/error/%A
 #SBATCH --mail-type=END
@@ -15,7 +15,7 @@
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions.parquet
-rule=rc_plus_0_rules.csv
+rule=mechinferred_dt_91_rules.csv
 
 # Commands
 ulimit -c 0
