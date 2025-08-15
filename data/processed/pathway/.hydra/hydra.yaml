@@ -2,14 +2,15 @@ hydra:
   run:
     dir: ${filepaths.processed_data}/pathway
   sweep:
-    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
-    subdir: ${hydra.job.num}
+    dir: ${filepaths.processed_data}/pathway
+    subdir: .
   launcher:
     _target_: hydra._internal.core_plugins.basic_launcher.BasicLauncher
   sweeper:
     _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
     max_batch_size: null
-    params: null
+    params:
+      src_file: mappings_known_reactions_x_rc_plus_1_rules.parquet,mappings_known_reactions_x_rc_plus_2_rules.parquet,mappings_known_reactions_x_rc_plus_3_rules.parquet,mappings_known_reactions_x_rc_plus_4_rules.parquet,mappings_known_reactions_x_mechinferred_dt_01_rules.parquet,mappings_known_reactions_x_mechinferred_dt_02_rules.parquet,mappings_known_reactions_x_mechinferred_dt_04_rules.parquet,mappings_known_reactions_x_mechinferred_dt_13_rules.parquet,mappings_known_reactions_x_mechinferred_dt_91_rules.parquet
   help:
     app_name: ${hydra.job.name}
     header: '${hydra.help.app_name} is powered by Hydra.
@@ -111,14 +112,15 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task: []
+    task:
+    - src_file=mappings_known_reactions_x_imt_rules.parquet
   job:
-    name: combine_rhea_uniprot
+    name: resolve_multiple_mappings
     chdir: true
-    override_dirname: ''
+    override_dirname: src_file=mappings_known_reactions_x_imt_rules.parquet
     id: ???
     num: ???
-    config_name: combine_rhea_uniprot
+    config_name: resolve_multiple_mappings
     env_set: {}
     env_copy: []
     config:
@@ -142,6 +144,7 @@ hydra:
       provider: schema
     output_dir: /home/stef/enz_rxn_data/data/processed/pathway
     choices:
+      mapping_resolver: largest_subgraph
       filepaths: filepaths
       hydra/env: default
       hydra/callbacks: null

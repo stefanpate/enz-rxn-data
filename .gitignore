@@ -178,3 +178,4 @@ nohup*
 *multirun.yaml
 **/.hydra
 data/raw/pathway/uniprotkb*.tsv
+artifacts/rules/bkms-and-reaxys-tempaltes.json
