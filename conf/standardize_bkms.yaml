@@ -1,0 +1,11 @@
+defaults:
+  - filepaths: filepaths
+  - _self_
+
+raw_bkms: ${filepaths.raw_data}/pathway/bkms-reactions.json
+
+hydra:
+  run:
+    dir: ${filepaths.processed_data}/pathway
+  job:
+    chdir: True

@@ -113,12 +113,12 @@ hydra:
     - hydra.mode=RUN
     task: []
   job:
-    name: combine_rhea_uniprot
+    name: standardize_bkms
     chdir: true
     override_dirname: ''
     id: ???
     num: ???
-    config_name: combine_rhea_uniprot
+    config_name: standardize_bkms
     env_set: {}
     env_copy: []
     config:
@@ -129,18 +129,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /gpfs/home/spn1560/enz-rxn-data
+    cwd: /home/stef/enz_rxn_data
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /gpfs/home/spn1560/enz-rxn-data/conf
+    - path: /home/stef/enz_rxn_data/conf
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/spn1560/enz-rxn-data/data/processed/pathway
+    output_dir: /home/stef/enz_rxn_data/data/processed/pathway
     choices:
       filepaths: filepaths
       hydra/env: default

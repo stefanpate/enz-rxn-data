@@ -179,3 +179,5 @@ nohup*
 **/.hydra
 data/raw/pathway/uniprotkb*.tsv
 artifacts/rules/bkms-and-reaxys-tempaltes.json
+data/raw/pathway/Reactions_BKMS.csv
+data/raw/pathway/bkms-reactions.json
