@@ -113,11 +113,11 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
-    - src_file=mappings_known_reactions_x_imt_rules.parquet
+    - src_file=mappings_known_reactions_x_levin_no_stereo_rules.parquet
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: src_file=mappings_known_reactions_x_imt_rules.parquet
+    override_dirname: src_file=mappings_known_reactions_x_levin_no_stereo_rules.parquet
     id: ???
     num: ???
     config_name: resolve_multiple_mappings
@@ -131,18 +131,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /home/stef/enz_rxn_data
+    cwd: /gpfs/home/spn1560/enz-rxn-data
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /home/stef/enz_rxn_data/conf
+    - path: /gpfs/home/spn1560/enz-rxn-data/conf
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/stef/enz_rxn_data/data/processed/pathway
+    output_dir: /home/spn1560/enz-rxn-data/data/processed/pathway
     choices:
       mapping_resolver: largest_subgraph
       filepaths: filepaths

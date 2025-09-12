@@ -138,11 +138,11 @@ hydra:
     - hydra.mode=RUN
     task:
     - rxn_file=known_reactions.parquet
-    - rule_file=imt_rules.csv
+    - rule_file=levin_no_stereo_rules.csv
   job:
     name: map_pathway_level_reactions
     chdir: true
-    override_dirname: rule_file=imt_rules.csv,rxn_file=known_reactions.parquet
+    override_dirname: rule_file=levin_no_stereo_rules.csv,rxn_file=known_reactions.parquet
     id: ???
     num: ???
     config_name: map_pathway_level_reactions

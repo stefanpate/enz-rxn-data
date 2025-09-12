@@ -1,5 +1,5 @@
 filepaths:
-  repo: /home/stef/enz_rxn_data
+  repo: /home/spn1560/enz-rxn-data
   data: ${.repo}/data
   artifacts: ${.repo}/artifacts
   raw_data: ${.data}/raw
@@ -11,5 +11,5 @@ filepaths:
   rules: ${.artifacts}/rules
 mapping_resolver:
   _target_: enz_rxn_data.mapping.largest_subgraph
-src_file: mappings_known_reactions_x_imt_rules.parquet
+src_file: mappings_known_reactions_x_levin_no_stereo_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}

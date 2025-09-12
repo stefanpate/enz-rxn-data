@@ -1,2 +1,2 @@
 - rxn_file=known_reactions.parquet
-- rule_file=imt_rules.csv
+- rule_file=levin_no_stereo_rules.csv
