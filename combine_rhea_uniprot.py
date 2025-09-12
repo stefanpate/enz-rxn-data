@@ -68,9 +68,9 @@ def main(cfg: DictConfig):
 
     # Filter out subunits
     prev_len = len(enz_df)
-    enz_df = enz_df.loc[~enz_df['Protein names'].isna()]
-    enz_df = enz_df.loc[~enz_df['Protein names'].str.contains('subunit')]
-    log.info(f"Filtered out {prev_len - len(enz_df)} subunits from UniProt entries.")
+    enz_df['Protein names'] = enz_df['Protein names'].fillna('unknown')
+    enz_df['subunit'] = enz_df['Protein names'].str.contains('subunit')
+    log.info(f"Identified {enz_df['subunit'].sum()} subunits in UniProt entries.")
 
     # Read in Rhea SMILES and assign appropriate column names
     rxn_smiles_df = pd.read_csv(Path(cfg.rhea_smiles), sep='\t', header=None)
@@ -159,6 +159,7 @@ def main(cfg: DictConfig):
             "ec": enz_df['EC number'],
             "organism": enz_df['Organism'],
             "name": enz_df['Protein names'],
+            "subunit": enz_df['subunit'],
         },
         schema=enzymes_schema,
     )
