@@ -36,6 +36,7 @@ enzymes_schema = pl.Schema(
         "ec": pl.String,
         "organism": pl.String,
         "name": pl.String,
+        "subunit": pl.Boolean,
     }
 )
 
