@@ -15,7 +15,7 @@
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions.parquet
-rule=levin_no_stereo_rules.csv
+rule=rdchiral_rules.csv
 
 # Commands
 ulimit -c 0

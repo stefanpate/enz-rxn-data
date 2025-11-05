@@ -170,7 +170,6 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-data/raw/pathway/sprhea_240310_v3_mapped_no_subunits.json
 conf/filepaths/filepaths.yaml
 logs/
 nohup*
@@ -178,6 +177,4 @@ nohup*
 *multirun.yaml
 **/.hydra
 data/raw/pathway/uniprotkb*.tsv
-artifacts/rules/bkms-and-reaxys-tempaltes.json
-data/raw/pathway/Reactions_BKMS.csv
-data/raw/pathway/bkms-reactions.json
+uniprotkb_reviewed_true_AND_reviewed_tr_2025_09_23.tsv
