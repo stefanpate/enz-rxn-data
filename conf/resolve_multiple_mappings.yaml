@@ -3,7 +3,7 @@ defaults:
   - mapping_resolver: largest_subgraph
   - _self_
 
-src_file: mappings_known_reactions_x_rc_plus_0_rules.parquet
+src_file: mappings_known_reactions_x_rdchiral_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}
 
 hydra:
