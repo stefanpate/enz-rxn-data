@@ -11,5 +11,5 @@ filepaths:
   rules: ${.artifacts}/rules
 mapping_resolver:
   _target_: enz_rxn_data.mapping.largest_subgraph
-src_file: mappings_known_reactions_x_rdchiral_rules.parquet
+src_file: mappings_known_reactions_x_mechinferred_dt_956_rules.parquet
 input_path: ${filepaths.interim_data}/pathway/${.src_file}

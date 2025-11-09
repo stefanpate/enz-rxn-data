@@ -10,7 +10,7 @@ hydra:
     _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
     max_batch_size: null
     params:
-      src_file: mappings_known_reactions_x_rc_plus_1_rules.parquet,mappings_known_reactions_x_rc_plus_2_rules.parquet,mappings_known_reactions_x_rc_plus_3_rules.parquet,mappings_known_reactions_x_rc_plus_4_rules.parquet,mappings_known_reactions_x_mechinferred_dt_01_rules.parquet,mappings_known_reactions_x_mechinferred_dt_02_rules.parquet,mappings_known_reactions_x_mechinferred_dt_04_rules.parquet,mappings_known_reactions_x_mechinferred_dt_13_rules.parquet,mappings_known_reactions_x_mechinferred_dt_91_rules.parquet
+      src_file: mappings_known_reactions_x_mechinferred_dt_002_rules.parquet,mappings_known_reactions_x_mechinferred_dt_006_rules.parquet,mappings_known_reactions_x_mechinferred_dt_014_rules.parquet,mappings_known_reactions_x_mechinferred_dt_056_rules.parquet,mappings_known_reactions_x_mechinferred_dt_956_rules.parquet
   help:
     app_name: ${hydra.job.name}
     header: '${hydra.help.app_name} is powered by Hydra.
@@ -105,20 +105,21 @@ hydra:
       - file
     disable_existing_loggers: false
   env: {}
-  mode: RUN
+  mode: MULTIRUN
   searchpath: []
   callbacks: {}
   output_subdir: .hydra
   overrides:
     hydra:
-    - hydra.mode=RUN
-    task: []
+    - hydra.mode=MULTIRUN
+    task:
+    - src_file=mappings_known_reactions_x_mechinferred_dt_956_rules.parquet
   job:
     name: resolve_multiple_mappings
     chdir: true
-    override_dirname: ''
-    id: ???
-    num: ???
+    override_dirname: src_file=mappings_known_reactions_x_mechinferred_dt_956_rules.parquet
+    id: '4'
+    num: 4
     config_name: resolve_multiple_mappings
     env_set: {}
     env_copy: []
