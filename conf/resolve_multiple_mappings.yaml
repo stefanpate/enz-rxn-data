@@ -16,4 +16,4 @@ hydra:
     subdir: .
   sweeper:
     params:
-      src_file: mappings_known_reactions_x_mechinferred_dt_002_rules.parquet,mappings_known_reactions_x_mechinferred_dt_006_rules.parquet,mappings_known_reactions_x_mechinferred_dt_014_rules.parquet,mappings_known_reactions_x_mechinferred_dt_056_rules.parquet,mappings_known_reactions_x_mechinferred_dt_956_rules.parquet
+      src_file: mappings_known_reactions_x_mechinferred_dt_019_rules.parquet,mappings_known_reactions_x_mechinferred_dt_039_rules.parquet,mappings_known_reactions_x_mechinferred_dt_112_rules.parquet,mappings_known_reactions_x_mechinferred_dt_224_rules.parquet
