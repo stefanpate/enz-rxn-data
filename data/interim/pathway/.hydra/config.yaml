@@ -10,7 +10,7 @@ filepaths:
   mcsa_mech_steps: ${.raw_mcsa}/mech_steps
   rules: ${.artifacts}/rules
 rxn_file: known_reactions.parquet
-rule_file: mechinferred_dt_014_rules.csv
+rule_file: mechinferred_dt_019_rules.csv
 rxn_path: ${filepaths.processed_data}/pathway/${.rxn_file}
 rule_path: ${filepaths.rules}/${.rule_file}
 batch_size: 50000
