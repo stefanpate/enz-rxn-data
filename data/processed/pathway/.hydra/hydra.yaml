@@ -111,12 +111,11 @@ hydra:
   overrides:
     hydra:
     - hydra.mode=RUN
-    task:
-    - rm_stereo=False
+    task: []
   job:
     name: combine_rhea_uniprot
     chdir: true
-    override_dirname: rm_stereo=False
+    override_dirname: ''
     id: ???
     num: ???
     config_name: combine_rhea_uniprot

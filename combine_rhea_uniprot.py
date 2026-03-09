@@ -7,11 +7,50 @@ from omegaconf import DictConfig
 from tqdm import tqdm
 from ergochemics.standardize import standardize_smiles, hash_compound, hash_reaction
 from functools import lru_cache
-from itertools import chain
+from itertools import chain, product
 import logging
 from enz_rxn_data.schemas import known_compounds_schema, enzymes_schema, known_reactions_schema
 from rdkit import Chem
 from collections import defaultdict
+import requests
+
+def get_pubmed_ids(text: str) -> list[str]:
+    return list(set(re.findall(r'PubMed:(\d+)', text)))
+
+def get_rhea_ids(text: str) -> list[str]:
+    return list(set(re.findall(r'RHEA:(\d+)', text)))
+
+def get_rhea_pubmed(entries: list[str]) -> list[tuple[str, str]]:
+    rhea_pubmed = set()
+    for elt in entries:
+        rids = get_rhea_ids(elt)
+        pids = get_pubmed_ids(elt)
+        if len(pids) == 0:
+            pids = [None]
+        rhea_pubmed |= set(product(rids, pids))
+
+    return rhea_pubmed
+
+def get_pubmed_dates(pubmed_ids: list[str]) -> dict[int, int]:
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+    pubmed2pubdate = {}
+    batch_size = 500
+    
+    for i in tqdm(range(0, len(pubmed_ids), batch_size), desc="Fetching PubMed dates"):
+        batch = pubmed_ids[i:i + batch_size]
+        try:
+            response = requests.post(url, data={"db": "pubmed", "id": ",".join(batch), "retmode": "json"})
+            response.raise_for_status()
+            result = response.json().get("result", {})
+            
+            for pmid in batch:
+                if pmid in result and "error" not in result[pmid]:
+                    pubmed2pubdate[int(pmid)] = int(result[pmid]["pubdate"][:4])
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+    
+    return pubmed2pubdate
+
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +91,20 @@ def main(cfg: DictConfig):
         
         return std_side
     
+    def df_std_rxn(raw_rxn_smiles: str) -> str | None:
+            try:
+                lhs, rhs = [side.split('.') for side in raw_rxn_smiles.split('>>')]
+                std_lhs = std_rxn_side(lhs)
+                std_rhs = std_rxn_side(rhs)
+
+                if std_lhs is None or std_rhs is None:
+                    return None
+                
+                return '.'.join(sorted(std_lhs)) + '>>' + '.'.join(sorted(std_rhs))
+            except Exception as e:
+                log.info(f"Error standardizing reaction SMILES '{raw_rxn_smiles}': {e}")
+                return None
+    
     # Get compound smiles to names
     log.info("Collecting compounds...")
     chebi2name = pd.read_csv(Path(cfg.chebi2name), sep='\t', header=None)
@@ -77,23 +130,8 @@ def main(cfg: DictConfig):
     rxn_smiles_df.columns = ['RHEA_ID', 'RXN_SMILES']
 
     log.info("Standardizing reaction SMILES...")
-    tmp = []
-    for i in tqdm(range(len(rxn_smiles_df))):
-        rxn = rxn_smiles_df.loc[i, 'RXN_SMILES']
-        lhs, rhs = [side.split('.') for side in rxn.split('>>')]
-        std_lhs = std_rxn_side(lhs)
-        
-        if std_lhs is None:
-            continue  # Skip reactions that failed to standardize on the left-hand side
-        
-        std_rhs = std_rxn_side(rhs)
-
-        if std_rhs is None:
-            continue # Skip reactions that failed to standardize on the right-hand side
-
-        tmp.append('.'.join(sorted(std_lhs)) + '>>' + '.'.join(sorted(std_rhs)))
-        
-    rxn_smiles_df['RXN_SMILES'] = tmp
+    
+    rxn_smiles_df['RXN_SMILES'] = rxn_smiles_df['RXN_SMILES'].apply(df_std_rxn)
 
     # Read in rhea directions
     rhea_directions = pd.read_csv(Path(cfg.rhea_directions), sep='\t')
@@ -108,19 +146,40 @@ def main(cfg: DictConfig):
 
     rxn_smiles_df["WORKING_IDX"] = rxn_smiles_df['RHEA_ID'].apply(lambda x: any_rhea_to_working_idx.get(x))
 
+    # Collect publication info
+    pub_info = [] # (pubmed_id, uniprot_id, rhea_id)
+    
     # Collect RHEA IDs iterating over Uniprot entries
     log.info("Merging rhea and uniprot entries...")
     matching_enz_ids = defaultdict(set)
     for _, row in tqdm(enz_df.iterrows(), total=len(enz_df)):
-        catalytic_activity = row['Catalytic activity']
         uniprot_entry = row['UniProt_Entry']
+        catalytic_activity = row['Catalytic activity']
         if isinstance(catalytic_activity, str):
-            match = re.findall(r'RHEA:(\d{1,6})', catalytic_activity)
-            for rhea_id in match:
-                matching_enz_ids[any_rhea_to_working_idx[int(rhea_id)]].add(uniprot_entry)
+            cat_act_entries = catalytic_activity.split("CATALYTIC ACTIVITY: ")
+            rhea_pubmed = get_rhea_pubmed(cat_act_entries)
+            for rhea_id, pubmed_id in rhea_pubmed:
+                if int(rhea_id) not in any_rhea_to_working_idx:
+                    log.info(f"RHEA ID {rhea_id} from UniProt entry {uniprot_entry} not found in Rhea directions.")
+                    continue
+                rhea_working_id = any_rhea_to_working_idx[int(rhea_id)]
+                matching_enz_ids[rhea_working_id].add(uniprot_entry)
+
+                if pubmed_id is not None:
+                    pub_info.append([pubmed_id, uniprot_entry, rhea_working_id])
+
+    pubmed_ids, *_ = zip(*pub_info)
+    pubmed2pubdate = get_pubmed_dates(list(set(pubmed_ids)))
+    uniprot2pubmed = defaultdict(set)
+    rhea2pubmed = defaultdict(set)
+    for pubmed_id, uniprot_id, rhea_working_id in pub_info:
+        uniprot2pubmed[uniprot_id].add(int(pubmed_id))
+        rhea2pubmed[rhea_working_id].add(int(pubmed_id))
     
     log.info(f"Found {sum(len(v) for v in matching_enz_ids.values())} enzyme-reaction pairs in Uniprot entries.")
     rxn_smiles_df['ENZYME_ID'] = rxn_smiles_df['WORKING_IDX'].apply(lambda x: list(matching_enz_ids[x]) if x in matching_enz_ids else [])
+    rxn_smiles_df['PUBMED_IDs'] = rxn_smiles_df['WORKING_IDX'].apply(lambda x: list(rhea2pubmed[x]) if x in rhea2pubmed else [])
+    rxn_smiles_df['PUBDATEs'] = rxn_smiles_df['PUBMED_IDs'].apply(lambda ids: [pubmed2pubdate[pid] for pid in ids if pid in pubmed2pubdate])
     all_matched_enz_ids = set(chain(*[v for v in matching_enz_ids.values()]))
     enz_df = enz_df[enz_df["UniProt_Entry"].isin(all_matched_enz_ids)] # Just keep enzymes that have reactions
 
@@ -128,7 +187,9 @@ def main(cfg: DictConfig):
     rxn_smiles_df = rxn_smiles_df.groupby("RXN_SMILES").agg(
         {
             "ENZYME_ID": lambda x: sum([lst for lst in x if isinstance(lst, list)], []), 
-            "RHEA_ID": list
+            "RHEA_ID": list,
+            "PUBMED_IDs": lambda x: sum([lst for lst in x if isinstance(lst, list)], []),
+            "PUBDATEs": lambda x: sum([lst for lst in x if isinstance(lst, list)], []),
         }
     ).reset_index()
     rxn_smiles_df["REV_RXN_SMILES"] = rxn_smiles_df["RXN_SMILES"].apply(lambda x: ">>".join(x.split(">>")[::-1]))
@@ -146,6 +207,8 @@ def main(cfg: DictConfig):
             "enzymes": rxn_smiles_df['ENZYME_ID'].apply(lambda x: list(set(x)) if isinstance(x, list) else []),
             "reverse": rxn_smiles_df['REVERSE_ID'],
             "db_ids": rxn_smiles_df['DB_IDs'].apply(lambda x: list(set(x)) if isinstance(x, list) else []),
+            "pubmed_ids": rxn_smiles_df['PUBMED_IDs'].apply(lambda x: list(set(x)) if isinstance(x, list) else []),
+            "publication_dates": rxn_smiles_df['PUBDATEs'].apply(lambda x: list(set(x)) if isinstance(x, list) else []),
         },
         schema=known_reactions_schema,
     )
@@ -160,6 +223,8 @@ def main(cfg: DictConfig):
             "organism": enz_df['Organism'],
             "name": enz_df['Protein names'],
             "subunit": enz_df['subunit'],
+            "pubmed_ids": enz_df['UniProt_Entry'].apply(lambda x: list(uniprot2pubmed[x]) if x in uniprot2pubmed else []),
+            "publication_dates": enz_df['UniProt_Entry'].apply(lambda x: list({pubmed2pubdate[pid] for pid in uniprot2pubmed[x] if pid in pubmed2pubdate}) if x in uniprot2pubmed else []),
         },
         schema=enzymes_schema,
     )

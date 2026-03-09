@@ -2,7 +2,7 @@ defaults:
   - filepaths: filepaths
   - _self_
 
-uniprot_fn: uniprotkb_reviewed_true_2025_04_01.tsv
+uniprot_fn: uniprotkb_reviewed_true_2026_03_09.tsv
 uniprot: ${filepaths.raw_data}/pathway/${uniprot_fn} # Path to the tsv file containing reviewed protein entries from UniProt
 rhea_smiles: ${filepaths.raw_data}/pathway/rhea-reaction-smiles.tsv # Path to the tsv file containing reaction SMILES from Rhea
 rhea_directions: ${filepaths.raw_data}/pathway/rhea-directions.tsv # Path to the tsv file containing reaction directions from Rhea

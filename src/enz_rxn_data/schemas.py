@@ -37,6 +37,8 @@ enzymes_schema = pl.Schema(
         "organism": pl.String,
         "name": pl.String,
         "subunit": pl.Boolean,
+        "pubmed_ids": pl.List(pl.Int32),
+        "publication_dates": pl.List(pl.Int32),
     }
 )
 
@@ -47,5 +49,7 @@ known_reactions_schema = pl.Schema(
         "enzymes": pl.List(pl.String),
         "reverse": pl.String,
         "db_ids": pl.List(pl.String),
+        "pubmed_ids": pl.List(pl.Int32),
+        "publication_dates": pl.List(pl.Int32),
     }
 )
