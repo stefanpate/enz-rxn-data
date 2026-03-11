@@ -11,7 +11,7 @@ from ast import literal_eval
 import logging
 from collections import defaultdict
 from enz_rxn_data.mechanism import get_overall_reaction
-from ergochemics.standardize import standardize_mol
+from ergochemics.standardize import standardize_mol, standardize_reaction, hash_reaction
 from ergochemics.mapping import rc_to_str
 
 def is_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
@@ -177,9 +177,25 @@ def is_strictly_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
     '''
     Check if the reaction is strictly balanced, i.e., all atom map numbers are conserved.
     '''
-    lhs_elements = {f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}" for mol in lhs for atom in mol.GetAtoms()}
-    rhs_elements = {f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}" for mol in rhs for atom in mol.GetAtoms()}
-    
+    if len(lhs) == 0 or len(rhs) == 0:
+        return False
+
+    lhs_elements = set()
+    for mol in lhs:
+        for atom in mol.GetAtoms():
+            if atom.GetAtomMapNum() == 0:
+                raise ValueError("All atoms must have atom map numbers to check if reaction is strictly balanced.")
+            
+            lhs_elements.add(f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}")
+
+    rhs_elements = set()
+    for mol in rhs:
+        for atom in mol.GetAtoms():
+            if atom.GetAtomMapNum() == 0:
+                raise ValueError("All atoms must have atom map numbers to check if reaction is strictly balanced.")
+            
+            rhs_elements.add(f"{atom.GetSymbol()}_{atom.GetAtomMapNum()}")
+
     return len(lhs_elements ^ rhs_elements) == 0
 
 def collect_rhea_rxns(smiles_fp: Path, directions_fp: Path, ec_fp: Path) -> dict[int, set[str]]:
@@ -208,7 +224,7 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="distill_mech_labeled_reactions")
 def main(cfg: DictConfig):
     min_amn = lambda mol: min(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum() > 0)
-    sms_std = lambda smi: Chem.MolToSmiles(standardize_mol(Chem.MolFromSmiles(smi), quiet=True), ignoreAtomMapNumbers=True)
+    sms_std = lambda smi: Chem.MolToSmiles(standardize_mol(Chem.MolFromSmiles(smi), quiet=True, neutralization_method="full"), ignoreAtomMapNumbers=True)
     is_H_ion = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
 
     rhea_smiles_fp = Path(cfg.filepaths.raw_data) / "pathway" / "rhea-reaction-smiles.tsv"
@@ -338,6 +354,8 @@ def main(cfg: DictConfig):
                 mech_aidxs[i].append(tmp_mech[i][j])
 
         std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
+        std_rxn = standardize_reaction(std_rxn, quiet=True)
+        rxn_id = hash_reaction(std_rxn)
         std_am_rxn = ".".join(std_am_rxn[0]) + ">>" + ".".join(std_am_rxn[1])
 
         if std_rxn == '>>':
@@ -347,21 +365,23 @@ def main(cfg: DictConfig):
         # Reported direction
         data.append(
             [
-                row["entry_id"], row["mechanism_id"], std_rxn, std_am_rxn,
+                rxn_id, row["entry_id"], row["mechanism_id"], std_rxn, std_am_rxn,
                 rc_aidxs, mech_aidxs, row["enzyme_name"], row["uniprot_id"], row["ec"], True
             ]
         )
 
         # Reverses
+        rev_rxn = ">>".join(std_rxn.split('>>')[::-1])
+        rev_id = hash_reaction(rev_rxn)
         data.append(
             [
-                row["entry_id"], row["mechanism_id"], ">>".join(std_rxn.split('>>')[::-1]),
+                rev_id, row["entry_id"], row["mechanism_id"], rev_rxn,
                 ">>".join(std_am_rxn.split('>>')[::-1]), rc_aidxs[::-1], mech_aidxs[::-1],
                 row["enzyme_name"], row["uniprot_id"], row["ec"], False
             ]
         )
 
-    columns = ["entry_id", "mechanism_id", "smarts", "am_smarts", "reaction_center", "mech_atoms", "enzyme_name", "uniprot_id", "ec", "reported_direction"]
+    columns = ["rxn_id", "entry_id", "mechanism_id", "smarts", "am_smarts", "reaction_center", "mech_atoms", "enzyme_name", "uniprot_id", "ec", "reported_direction"]
     distilled = pd.DataFrame(data, columns=columns)
     distilled["mech_atoms"] = distilled["mech_atoms"].apply(rc_to_str)
     distilled["reaction_center"] = distilled["reaction_center"].apply(rc_to_str)
