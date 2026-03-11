@@ -5,7 +5,7 @@ import re
 import hydra
 from omegaconf import DictConfig
 from tqdm import tqdm
-from ergochemics.standardize import standardize_smiles, hash_compound, hash_reaction
+from ergochemics.standardize import standardize_smiles, hash_molecule, hash_reaction
 from functools import lru_cache
 from itertools import chain, product
 import logging
@@ -241,7 +241,7 @@ def main(cfg: DictConfig):
 
     known_compounds = pl.DataFrame(
         {
-            "id": smiles2names["SMILES"].apply(hash_compound),
+            "id": smiles2names["SMILES"].apply(hash_molecule),
             "smiles": smiles2names["SMILES"],
             "name": smiles2names["NAME"].apply(lambda x: x.strip()),
             "chebi_id": smiles2names["CHEBI_ID"],
