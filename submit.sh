@@ -10,18 +10,26 @@
 #SBATCH --error=/home/spn1560/enz-rxn-data/logs/error/%x_%A_%a.err
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --array=0-3
+#SBATCH --array=0-12
 #SBATCH --mail-user=stefan.pate@northwestern.edu
 
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions.parquet
 rule=(
-    mechinferred_dt_224_rules.csv
-    mechinferred_dt_112_rules.csv
-    mechinferred_dt_039_rules.csv
-    mechinferred_dt_019_rules.csv
-    # mechinferred_dt_002_rules.csv
+    imt_rules_before_2015.csv
+    mechinferred_dt_005_before_2015_rules.csv
+    mechinferred_dt_009_before_2015_rules.csv
+    mechinferred_dt_021_before_2015_rules.csv
+    mechinferred_dt_069_before_2015_rules.csv
+    mechinferred_dt_932_before_2015_rules.csv
+    mechinformed_rules_before_2015.csv
+    rc_plus_0_rules_before_2015.csv
+    rc_plus_1_rules_before_2015.csv
+    rc_plus_2_rules_before_2015.csv
+    rc_plus_3_rules_before_2015.csv
+    rc_plus_4_rules_before_2015.csv
+    rdchiral_rules_before_2015.csv
 )
 
 # Commands
