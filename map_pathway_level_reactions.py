@@ -49,7 +49,7 @@ def process_task_chunk(task_chunk):
                     result.aligned_smarts, 
                     result.atom_mapped_smarts, 
                     rule_smarts, 
-                    rc_to_str(result.reaction_center), 
+                    rc_to_str(result.template_aidxs), 
                     rule_id
                 ])
         except Exception as e:
