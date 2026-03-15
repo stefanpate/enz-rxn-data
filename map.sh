@@ -3,7 +3,7 @@
 #SBATCH -p b1039
 #SBATCH -N 1
 #SBATCH -n 50
-#SBATCH --mem=0
+#SBATCH --mem=32G
 #SBATCH -t 48:00:00
 #SBATCH --job-name="map"
 #SBATCH --output=/home/spn1560/enz-rxn-data/logs/out/%x_%A_%a.out
@@ -18,11 +18,11 @@ script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions.parquet
 rule=(
     imt_rules_before_2015.csv
-    mechinferred_dt_005_before_2015_rules.csv
-    mechinferred_dt_009_before_2015_rules.csv
-    mechinferred_dt_021_before_2015_rules.csv
-    mechinferred_dt_069_before_2015_rules.csv
-    mechinferred_dt_932_before_2015_rules.csv
+    mechinferred_dt_005_rules_before_2015.csv
+    mechinferred_dt_009_rules_before_2015.csv
+    mechinferred_dt_021_rules_before_2015.csv
+    mechinferred_dt_069_rules_before_2015.csv
+    mechinferred_dt_932_rules_before_2015.csv
     mechinformed_rules_before_2015.csv
     rc_plus_0_rules_before_2015.csv
     rc_plus_1_rules_before_2015.csv
