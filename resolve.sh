@@ -10,25 +10,17 @@
 #SBATCH --error=/home/spn1560/enz-rxn-data/logs/error/%x_%A_%a.err
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --array=0-12
+#SBATCH --array=0-4
 #SBATCH --mail-user=stefan.pate@northwestern.edu
 
 # Args
 script=/home/spn1560/enz-rxn-data/resolve_multiple_mappings.py
 src_file=(
-    mappings_known_reactions_x_imt_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinferred_dt_005_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinferred_dt_009_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinferred_dt_021_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinferred_dt_069_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinferred_dt_932_rules_before_2015.parquet
-    mappings_known_reactions_x_mechinformed_rules_before_2015.parquet
-    mappings_known_reactions_x_rc_plus_0_rules_before_2015.parquet
-    mappings_known_reactions_x_rc_plus_1_rules_before_2015.parquet
-    mappings_known_reactions_x_rc_plus_2_rules_before_2015.parquet
-    mappings_known_reactions_x_rc_plus_3_rules_before_2015.parquet
-    mappings_known_reactions_x_rc_plus_4_rules_before_2015.parquet
-    mappings_known_reactions_x_rdchiral_rules_before_2015.parquet
+    mappings_known_reactions_x_mechinferred_dt_035_rules_before_2015_direct_mcsa_only.parquet
+    mappings_known_reactions_x_mechinferred_dt_059_rules_before_2015_direct_mcsa_only.parquet
+    mappings_known_reactions_x_mechinferred_dt_106_rules_before_2015_direct_mcsa_only.parquet
+    mappings_known_reactions_x_mechinferred_dt_244_rules_before_2015_direct_mcsa_only.parquet
+    mappings_known_reactions_x_mechinferred_dt_961_rules_before_2015_direct_mcsa_only.parquet
 )
 
 # Commands
