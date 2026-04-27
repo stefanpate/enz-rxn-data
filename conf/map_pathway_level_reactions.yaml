@@ -11,6 +11,7 @@ rule_path: ${filepaths.rules}/${.rule_file}
 batch_size: 50000
 max_workers: 50
 chunk_size: 100
+missing_rule_cofactors: false
 
 hydra:
   run:
