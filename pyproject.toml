@@ -27,6 +27,14 @@ dependencies = [
 [project.scripts]
 enz-rxn-data = "enz_rxn_data:main"
 
+[project.optional-dependencies]
+thermo = [
+    "equilibrator-api>=0.6.0",
+    "equilibrator-assets>=0.6.0",
+    "torch~=2.10.0",
+    "torch-geometric~=2.7.0",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
