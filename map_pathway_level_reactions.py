@@ -1,3 +1,80 @@
+# TODO: Delete after use this patch to map retrobiocat rules
+import ergochemics.mapping as _mapping
+from typing import Iterable
+def _finalize_mapped_reaction(reactants: Iterable[Chem.Mol], output: Iterable[Chem.Mol], permuted_idxs: list[int], am_to_reactant_idx: dict[int, int]) -> tuple[str, str, tuple[tuple[int, ...], tuple[int, ...]]]:
+    '''
+    Args
+    ----
+    reactants:Iterable[Chem.Mol]
+        Reactants. Note: must be ordered as they match
+        lhs operator templates
+    output:Iterable[Chem.Mol]
+        Output from operator.RunReactants(reactants) that
+        matches the actual products
+    permuted_idxs:list[int]
+        Original indices of reactants in reaction,
+        permuted to match the operator
+    am_to_reactant_idx:dict[int, int]
+        Mapping of atom map numbers to reactant indices
+        (i.e. which reactant the atom map number belongs to)
+    
+    Returns
+    -------
+    :tuple[str, str, tuple[tuple[int, ...], tuple[int, ...]]]
+        Operator aligned reaction without atom mapping
+        Operator aligned reaction WITH atom mapping
+        Reaction center indices
+    '''
+    aligned_no_am = '.'.join([Chem.MolToSmiles(m) for m in reactants]) + '>>' + '.'.join([Chem.MolToSmiles(m) for m in output])
+
+    am = 1
+    rhs_am_rc = []
+    for prod in output:
+        for atom in prod.GetAtoms():
+            atom.SetAtomMapNum(am)
+            props = atom.GetPropsAsDict()
+            rct_atom_idx = props.get('react_atom_idx')
+            rct_idx = props.get('reactant_idx')
+            old_am = props.get('old_mapno')
+            
+            if rct_idx is not None:
+                reactants[permuted_idxs.index(rct_idx)].GetAtomWithIdx(rct_atom_idx).SetAtomMapNum(am)
+            elif old_am is not None:
+                print(props)
+                rct_idx = am_to_reactant_idx[old_am]
+                reactants[rct_idx].GetAtomWithIdx(rct_atom_idx).SetAtomMapNum(am)
+                rhs_am_rc.append(atom.GetAtomMapNum())
+            else:
+                continue
+                
+            am += 1
+
+    # Reaction.RunReactants() outputs do not have atoms ordered according to their
+    # canonical SMILES ordering. Must go back and forth betweeen SMILES and mol, 
+    # then label according to atom map numbers
+    try:
+        rhs_am_smiles = [Chem.MolToSmiles(m, ignoreAtomMapNumbers=True) for m in output]
+    except Exception as e:
+        if e.__class__.__name__ == 'ArgumentError':
+            raise ValueError("RDKit ArgumentError encountered when generating SMILES from reaction output. Returning unmapped result.")
+        
+    rhs_am_recap = [Chem.MolFromSmiles(smi) for smi in rhs_am_smiles]
+    rhs_rc = []
+    for mol in rhs_am_recap:
+        inner_rc = []
+        for atom in mol.GetAtoms():
+            if atom.GetAtomMapNum() in rhs_am_rc:
+                inner_rc.append(atom.GetIdx())
+        rhs_rc.append(tuple(inner_rc))
+    rhs_rc = tuple(rhs_rc)
+
+    aligned_with_am = '.'.join([Chem.MolToSmiles(m, ignoreAtomMapNumbers=True) for m in reactants]) + '>>' + '.'.join(rhs_am_smiles)
+    return aligned_no_am, aligned_with_am, rhs_rc
+
+_mapping._finalize_mapped_reaction = _finalize_mapped_reaction
+
+##### END MONKEY PATCH ######
+
 import hydra
 from omegaconf import DictConfig
 from ergochemics.mapping import operator_map_reaction, rc_to_str
