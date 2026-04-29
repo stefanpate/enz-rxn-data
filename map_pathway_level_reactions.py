@@ -1,6 +1,7 @@
 # TODO: Delete after use this patch to map retrobiocat rules
 import ergochemics.mapping as _mapping
 from typing import Iterable
+from rdkit import Chem
 def _finalize_mapped_reaction(reactants: Iterable[Chem.Mol], output: Iterable[Chem.Mol], permuted_idxs: list[int], am_to_reactant_idx: dict[int, int]) -> tuple[str, str, tuple[tuple[int, ...], tuple[int, ...]]]:
     '''
     Args
@@ -40,7 +41,6 @@ def _finalize_mapped_reaction(reactants: Iterable[Chem.Mol], output: Iterable[Ch
             if rct_idx is not None:
                 reactants[permuted_idxs.index(rct_idx)].GetAtomWithIdx(rct_atom_idx).SetAtomMapNum(am)
             elif old_am is not None:
-                print(props)
                 rct_idx = am_to_reactant_idx[old_am]
                 reactants[rct_idx].GetAtomWithIdx(rct_atom_idx).SetAtomMapNum(am)
                 rhs_am_rc.append(atom.GetAtomMapNum())
