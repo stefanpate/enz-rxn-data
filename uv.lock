@@ -388,7 +388,7 @@ thermo = [
 requires-dist = [
     { name = "equilibrator-api", marker = "extra == 'thermo'", specifier = ">=0.6.0" },
     { name = "equilibrator-assets", marker = "extra == 'thermo'", specifier = ">=0.6.0" },
-    { name = "ergochemics", specifier = ">=0.1.2" },
+    { name = "ergochemics", git = "https://github.com/stefanpate/ergochemics" },
     { name = "hydra-core", specifier = ">=1.3.2" },
     { name = "hydra-submitit-launcher", specifier = ">=1.2.0" },
     { name = "ipykernel", specifier = ">=6.29.5" },
@@ -466,16 +466,12 @@ wheels = [
 [[package]]
 name = "ergochemics"
 version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/stefanpate/ergochemics#8da2dc930320c6f5e4be7d51f1b0db4bcc634643" }
 dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "pandas", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "pydantic" },
     { name = "rdkit" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/9a/c441e42656ef523b1297faa47f92b4b513b804ba6c54e4a8aac178e807d3/ergochemics-0.1.2.tar.gz", hash = "sha256:8d9a0eb643c44bf929e2c31faa21142ae0d74ae248808d98de9283120a90faf2", size = 23526 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/f3/eed35cdaa28bb1b7602e47b2db8527bb25e8748cc83e3ee899d6232aec1d/ergochemics-0.1.2-py3-none-any.whl", hash = "sha256:07b0a54bfd586132d8204e8f60bfc1cc006b02e47c9050846897babeac424e83", size = 22099 },
 ]
 
 [[package]]
