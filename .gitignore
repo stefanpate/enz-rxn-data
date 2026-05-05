@@ -180,3 +180,4 @@ nohup*
 **/.hydra
 data/raw/pathway/uniprotkb*.tsv
 uniprotkb_reviewed_true_AND_reviewed_tr_2025_09_23.tsv
+.vscode

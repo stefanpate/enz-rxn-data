@@ -26,5 +26,5 @@ src_file=(
 # Commands
 ulimit -c 0
 module purge
-source /home/spn1560/enz-rxn-data/.venv/bin/activate
+source ${UV_PROJECT_ENVIRONMENT}/bin/activate
 python $script src_file=${src_file[$SLURM_ARRAY_TASK_ID]}

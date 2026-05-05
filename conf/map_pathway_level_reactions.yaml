@@ -12,6 +12,7 @@ batch_size: 50000
 max_workers: 50
 chunk_size: 100
 missing_rule_cofactors: false
+explicit_hs: false
 
 hydra:
   run:

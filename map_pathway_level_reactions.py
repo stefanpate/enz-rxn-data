@@ -33,7 +33,7 @@ def checkpoint_results(results, output_file):
     os.replace(tmp_path, output_file)
 
 
-def process_task_chunk(task_chunk, missing_rule_cofactors=False):
+def process_task_chunk(task_chunk, missing_rule_cofactors=False, explicit_hs=False):
     """Process a chunk of tasks in a single worker"""
     chunk_results = []
     for rxn_id, rxn_smarts, rule_id, rule_smarts in task_chunk:
@@ -43,7 +43,7 @@ def process_task_chunk(task_chunk, missing_rule_cofactors=False):
             subreactions = [rxn_smarts]
         try:
             for rxn in subreactions:
-                result = operator_map_reaction(rxn, rule_smarts)
+                result = operator_map_reaction(rxn, rule_smarts, explicit_hs=explicit_hs)
                 if result.did_map:
                     chunk_results.append([
                         rxn_id, 
@@ -81,7 +81,7 @@ def generate_subreactions(rxn: str, operator: str) -> list[str]:
 
 @hydra.main(version_base=None, config_path="conf", config_name="map_pathway_level_reactions")
 def main(cfg: DictConfig):
-    _process_task_chunk = partial(process_task_chunk, missing_rule_cofactors=cfg.missing_rule_cofactors)
+    _process_task_chunk = partial(process_task_chunk, missing_rule_cofactors=cfg.missing_rule_cofactors, explicit_hs=cfg.explicit_hs)
     
     def process_batch(executor, batch, batch_num, chunk_size=50):
         """Process a single batch of tasks using chunking"""
