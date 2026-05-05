@@ -1,3 +1,4 @@
+import os
 import hydra
 from omegaconf import DictConfig
 from ergochemics.mapping import operator_map_reaction, rc_to_str
@@ -10,11 +11,26 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from itertools import product, combinations
 
-def task_generator(reactions, rules):
-    """Generator that yields tasks without storing them all in memory"""
+OUTPUT_COLUMNS = ["rxn_id", "smarts", "am_smarts", "rule", "template_aidxs", "rule_id"]
+
+
+def task_generator(reactions, rules, completed=None):
+    """Generator that yields tasks without storing them all in memory.
+    Skips (rxn_id, rule_smarts) pairs already present in `completed`."""
+    completed = completed or set()
     for i, rxn in reactions.iterrows():
         for j, rule in rules.iterrows():
+            if (rxn.id, rule.smarts) in completed:
+                continue
             yield (rxn.id, rxn.smarts, rule.id, rule.smarts)
+
+
+def checkpoint_results(results, output_file):
+    """Atomically rewrite the output parquet from the full accumulated results."""
+    df = pd.DataFrame(results, columns=OUTPUT_COLUMNS)
+    tmp_path = f"{output_file}.tmp"
+    df.to_parquet(tmp_path, index=False)
+    os.replace(tmp_path, output_file)
 
 
 def process_task_chunk(task_chunk, missing_rule_cofactors=False):
@@ -94,58 +110,66 @@ def main(cfg: DictConfig):
         print(f"Batch {batch_num + 1} completed with {len(batch_results)} successful mappings")
         return batch_results
     
-    def process_in_batches(tasks_gen, batch_size=1000, max_workers=None, chunk_size=50):
-        """Process tasks in batches to control memory usage"""
-        all_results = []
+    def process_in_batches(tasks_gen, output_file, seed_results=None, batch_size=1000, max_workers=None, chunk_size=50):
+        """Process tasks in batches, checkpointing the output parquet after each batch."""
+        all_results = list(seed_results) if seed_results else []
         batch_count = 0
-        
+
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             batch = []
-            
+
             for task in tasks_gen:
                 batch.append(task)
-                
-                # Process batch when it reaches the specified size
+
                 if len(batch) >= batch_size:
                     batch_results = process_batch(executor, batch, batch_count, chunk_size)
                     all_results.extend(batch_results)
+                    checkpoint_results(all_results, output_file)
+                    print(f"Checkpointed {len(all_results)} mappings to {output_file}")
                     batch = []
                     batch_count += 1
-            
-            # Process any remaining tasks in the final batch
+
             if batch:
                 batch_results = process_batch(executor, batch, batch_count, chunk_size)
                 all_results.extend(batch_results)
-        
-        return all_results
-    
-    reactions = pd.read_parquet(Path(cfg.rxn_path))
+                checkpoint_results(all_results, output_file)
+                print(f"Checkpointed {len(all_results)} mappings to {output_file}")
 
-    # Load rules
+        return all_results
+
+    output_file = f"mappings_{Path(cfg.rxn_file).stem}_x_{Path(cfg.rule_file).stem}.parquet"
+
+    reactions = pd.read_parquet(Path(cfg.rxn_path))
     rules = pd.read_csv(Path(cfg.rule_path), sep=",")
-    
+
+    # Resume: load any prior results and skip already-completed (rxn_id, rule_smarts) pairs
+    seed_results = []
+    completed = set()
+    if Path(output_file).exists():
+        prior = pd.read_parquet(output_file)
+        seed_results = prior[OUTPUT_COLUMNS].itertuples(index=False, name=None)
+        seed_results = [list(row) for row in seed_results]
+        completed = set(zip(prior["rxn_id"], prior["rule"]))
+        print(f"Resuming from {output_file}: {len(seed_results)} prior mappings, {len(completed)} (rxn_id, rule) pairs to skip")
+
     print(f"Processing {len(reactions)} reactions against {len(rules)} rules")
     print(f"Total combinations: {len(reactions) * len(rules):,}")
-    
-    # Use generator instead of creating all tasks in memory
-    tasks_gen = task_generator(reactions, rules)
-    
-    # Process in batches to control memory usage
+
+    tasks_gen = task_generator(reactions, rules, completed=completed)
+
     all_results = process_in_batches(
-        tasks_gen, 
-        batch_size=cfg.batch_size, 
+        tasks_gen,
+        output_file,
+        seed_results=seed_results,
+        batch_size=cfg.batch_size,
         max_workers=cfg.get('max_workers', 50),
         chunk_size=cfg.get('chunk_size', 50)
     )
-    
-    # Create final DataFrame and save
-    columns = ["rxn_id", "smarts", "am_smarts", "rule", "template_aidxs", "rule_id"]
-    df = pd.DataFrame(all_results, columns=columns)
-    
-    output_file = f"mappings_{Path(cfg.rxn_file).stem}_x_{Path(cfg.rule_file).stem}.parquet"
-    df.to_parquet(output_file, index=False)
-    
-    print(f"Final results saved to {output_file} with {len(df)} total mappings")
+
+    # Final write (safety net; checkpoints already wrote the same data)
+    checkpoint_results(all_results, output_file)
+
+    print(f"Final results saved to {output_file} with {len(all_results)} total mappings")
 
 if __name__ == "__main__":
     main()
