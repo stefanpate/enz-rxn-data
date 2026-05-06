@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -A p30041
-#SBATCH -p normal
+#SBATCH -A b1039
+#SBATCH -p b1039
 #SBATCH -N 1
-#SBATCH -n 30
+#SBATCH -n 50
 #SBATCH --mem=0
 #SBATCH -t 48:00:00
 #SBATCH --job-name="map"
@@ -31,5 +31,4 @@ rule=(
 # Commands
 ulimit -c 0
 module purge
-source ${UV_PROJECT_ENVIRONMENT}/bin/activate
-python $script rxn_file=$rxn rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs
+uv run python $script rxn_file=$rxn rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs

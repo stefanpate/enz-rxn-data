@@ -43,7 +43,7 @@ def process_task_chunk(task_chunk, missing_rule_cofactors=False, explicit_hs=Fal
             subreactions = [rxn_smarts]
         try:
             for rxn in subreactions:
-                result = operator_map_reaction(rxn, rule_smarts, explicit_hs=explicit_hs)
+                result = operator_map_reaction(rxn, rule_smarts, explicit_hs=explicit_hs, quiet=True)
                 if result.did_map:
                     chunk_results.append([
                         rxn_id, 
