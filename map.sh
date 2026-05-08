@@ -30,4 +30,4 @@ rule=(
 # Commands
 ulimit -c 0
 module purge
-uv run python $script rxn_file=$(rxn[$SLURM_ARRAY_TASK_ID]) rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs
+uv run python $script rxn_file=${rxn[$SLURM_ARRAY_TASK_ID]} rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs
