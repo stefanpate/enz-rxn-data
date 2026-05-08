@@ -10,25 +10,24 @@
 #SBATCH --error=/home/spn1560/enz-rxn-data/logs/error/%x_%A_%a.err
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --array=0-5
+#SBATCH --array=0-1
 #SBATCH --mail-user=stefan.pate@northwestern.edu
 
 # Args
 script=/home/spn1560/enz-rxn-data/map_pathway_level_reactions.py
 rxn=known_reactions_after_2015.parquet
-missing_rule_cofactors=true
+missing_rule_cofactors=false
 explicit_hs=true
+rxn=(
+    known_reactions.parquet
+    known_reactions_after_2015.parquet
+)
 rule=(
-    EVODEX-Cm.csv
-    EVODEX-Dm.csv
-    EVODEX-Em.csv
-    evodex_Cm_rules_before_2015.csv
-    evodex_Dm_rules_before_2015.csv
-    evodex_Em_rules_before_2015.csv
-
+    ehreact_rules.csv
+    ehreact_rules_before_2015.csv
 )
 
 # Commands
 ulimit -c 0
 module purge
-uv run python $script rxn_file=$rxn rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs
+uv run python $script rxn_file=$(rxn[$SLURM_ARRAY_TASK_ID]) rule_file=${rule[$SLURM_ARRAY_TASK_ID]} missing_rule_cofactors=$missing_rule_cofactors explicit_hs=$explicit_hs
