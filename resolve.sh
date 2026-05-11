@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -A p33041
+#SBATCH -A p30041
 #SBATCH -p short
 #SBATCH -N 1
 #SBATCH -n 1
@@ -16,11 +16,10 @@
 # Args
 script=/home/spn1560/enz-rxn-data/resolve_multiple_mappings.py
 src_file=(
-    mappings_known_reactions_x_ehreact_rules.parquet
+    mappings_known_reactions_x_ehreact_rules_before_2015.parquet
 )
 
 # Commands
 ulimit -c 0
 module purge
-source ${UV_PROJECT_ENVIRONMENT}/bin/activate
-python $script src_file=${src_file[$SLURM_ARRAY_TASK_ID]}
+uv run python $script src_file=${src_file[$SLURM_ARRAY_TASK_ID]}
