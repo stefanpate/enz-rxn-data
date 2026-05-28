@@ -31,7 +31,7 @@ def is_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
 
     return lhs_atoms == rhs_atoms
 
-def match_overall_candidates(lhs: list[Chem.Mol], rhs: list[Chem.Mol], lhs_candidate: list[Chem.Mol], rhs_candidate: list[Chem.Mol]) -> tuple[list[Chem.Mol], list[Chem.Mol]]:
+def match_overall_candidates(lhs: list[Chem.Mol], rhs: list[Chem.Mol], lhs_candidate: list[Chem.Mol], rhs_candidate: list[Chem.Mol], rm_stereo: bool) -> tuple[list[Chem.Mol], list[Chem.Mol]]:
     '''
     Matches the overall reaction candidates to the lhs and rhs of the mechanistic reaction.
     
@@ -71,8 +71,8 @@ def match_overall_candidates(lhs: list[Chem.Mol], rhs: list[Chem.Mol], lhs_candi
                     remaining_idxs.remove(idx)
                     break
                 
-                cmol_std = standardize_mol(cmol, quiet=True)
-                mol_std = standardize_mol(mol, quiet=True)
+                cmol_std = standardize_mol(cmol, quiet=True, neutralization_method='full', do_remove_stereo=rm_stereo)
+                mol_std = standardize_mol(mol, quiet=True, neutralization_method='full', do_remove_stereo=rm_stereo)
                 ss_match = cmol_std.GetSubstructMatch(mol_std)
                 if len(ss_match) == cmol_std.GetNumAtoms(): # Standardized mols match
                     matches[k].append(mol)
@@ -224,7 +224,7 @@ log = logging.getLogger(__name__)
 @hydra.main(version_base=None, config_path="conf", config_name="distill_mech_labeled_reactions")
 def main(cfg: DictConfig):
     min_amn = lambda mol: min(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum() > 0)
-    sms_std = lambda smi: Chem.MolToSmiles(standardize_mol(Chem.MolFromSmiles(smi), quiet=True, neutralization_method="full"), ignoreAtomMapNumbers=True)
+    sms_std = lambda smi: Chem.MolToSmiles(standardize_mol(Chem.MolFromSmiles(smi), quiet=True, neutralization_method="full", do_remove_stereo=cfg.remove_stereo), ignoreAtomMapNumbers=True)
     is_H_ion = lambda mol : all([atom.GetAtomicNum() == 1 for atom in mol.GetAtoms()]) and len(mol.GetAtoms()) == 1
 
     rhea_smiles_fp = Path(cfg.filepaths.raw_data) / "pathway" / "rhea-reaction-smiles.tsv"
@@ -240,7 +240,8 @@ def main(cfg: DictConfig):
             entries = {**entries, **json.load(f)}
 
     # Load mech labeled reactions
-    mech_rxns = pd.read_csv(filepath_or_buffer=Path(cfg.mech_rxns), sep=",")
+    suffix = "" if cfg.remove_stereo else "_stereo"
+    mech_rxns = pd.read_csv(filepath_or_buffer=Path(cfg.filepaths.interim_data) / "mcsa" / f"mech_labeled_reactions{suffix}.csv", sep=",")
     mech_rxns["mech_atoms"] = mech_rxns["mech_atoms"].apply(literal_eval)
 
     # Main loop
@@ -283,7 +284,8 @@ def main(cfg: DictConfig):
                 [Chem.MolFromSmiles(elt) for elt in lhs],
                 [Chem.MolFromSmiles(elt) for elt in rhs],
                 lhs_candidate,
-                rhs_candidate
+                rhs_candidate,
+                cfg.remove_stereo,
             )
 
             if len(lhs_mols) != 0 and len(rhs_mols) != 0:
@@ -354,7 +356,7 @@ def main(cfg: DictConfig):
                 mech_aidxs[i].append(tmp_mech[i][j])
 
         std_rxn = ".".join(std_rxn[0]) + ">>" + ".".join(std_rxn[1])
-        std_rxn = standardize_reaction(std_rxn, quiet=True)
+        std_rxn = standardize_reaction(std_rxn, quiet=True, neutralization_method='full', do_remove_stereo=cfg.remove_stereo)
         rxn_id = hash_reaction(std_rxn)
         std_am_rxn = ".".join(std_am_rxn[0]) + ">>" + ".".join(std_am_rxn[1])
 
@@ -385,7 +387,8 @@ def main(cfg: DictConfig):
     distilled = pd.DataFrame(data, columns=columns)
     distilled["mech_atoms"] = distilled["mech_atoms"].apply(rc_to_str)
     distilled["reaction_center"] = distilled["reaction_center"].apply(rc_to_str)
-    distilled.to_parquet("distilled_mech_reactions.parquet") # Save
+    suffix = "" if cfg.remove_stereo else "_stereo"
+    distilled.to_parquet(f"distilled_mech_reactions{suffix}.parquet") # Save
 
 if __name__ == "__main__":
     main()

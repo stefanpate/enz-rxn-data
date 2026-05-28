@@ -30,6 +30,7 @@ class CmlBond(BaseModel):
     atom_refs: tuple[str, str]
     order: int | None
     convention: str | None = None
+    stereo: str | None = None  # 'W' (wedge, up) or 'H' (hash, down) from <bondStereo>; None otherwise
 
 class CmlMEFlow(BaseModel):
     """
@@ -66,9 +67,11 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
     if len(tag_ns) == 1:
         tag = ''
         ns = None
+        ns_uri = ''
     elif len(tag_ns) == 2:
         tag = tag_ns[-1] + ':'
         ns = {tag.strip(':') : tag_ns[0].strip('{')}
+        ns_uri = '{' + tag_ns[0].strip('{') + '}'
 
 
     # Extract atoms
@@ -92,11 +95,13 @@ def parse_mrv(mech_step: Path) -> tuple[dict[str, CmlAtom], dict[str, CmlBond], 
     bonds = {}
     for bond in root.xpath(f"//{tag}bond", namespaces=ns):
         order = bond.get('order') if bond.get('order') is not None else 1 if bond.get('convention') == 'cxn:coord' else None
+        stereo_el = bond.find(f"{ns_uri}bondStereo")
         bond_data = {
             'id': bond.get('id'),
             'atom_refs': tuple(bond.get('atomRefs2').split(' ')),
             'order': order,
-            'convention': bond.get('convention')
+            'convention': bond.get('convention'),
+            'stereo': stereo_el.text.strip() if stereo_el is not None and stereo_el.text else None,
         }
         cbond = CmlBond(**bond_data)
         bonds[cbond.atom_refs] = cbond
@@ -130,12 +135,13 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
     }
 
     am = 1
-    for catom in sorted(cml_atoms):
+    sorted_atoms = sorted(cml_atoms)
+    for catom in sorted_atoms:
         if catom.element_type == 'R':
             aidx = rw_mol.AddAtom(Chem.Atom('*'))
         else:
             aidx = rw_mol.AddAtom(Chem.Atom(catom.element_type))
-        
+
         mcsa2rdkit[catom.id] = aidx
         rw_mol.GetAtomWithIdx(aidx).SetProp('mcsa_id', catom.id)
         rw_mol.GetAtomWithIdx(aidx).SetAtomMapNum(am)
@@ -168,11 +174,38 @@ def construct_mols(cml_atoms: Iterable[CmlAtom], cml_bonds: Iterable[CmlBond]) -
         
         from_, to = [mcsa2rdkit[atom_ref] for atom_ref in cbond.atom_refs]
 
-        rw_mol.AddBond(from_, to, order=bond_type)
+        bond_idx = rw_mol.AddBond(from_, to, order=bond_type) - 1
+
+        # Wedge starts at the first atom of atomRefs2 (== from_), so default RDKit
+        # BEGINWEDGE / BEGINDASH orientation matches the MRV convention.
+        if cbond.stereo == 'W':
+            rw_mol.GetBondWithIdx(bond_idx).SetBondDir(Chem.BondDir.BEGINWEDGE)
+        elif cbond.stereo == 'H':
+            rw_mol.GetBondWithIdx(bond_idx).SetBondDir(Chem.BondDir.BEGINDASH)
 
     Chem.SanitizeMol(rw_mol)
+
+    # Attach 2D conformer from CML x/y so RDKit can perceive stereo from wedges + layout
+    conf = Chem.Conformer(rw_mol.GetNumAtoms())
+    for catom in sorted_atoms:
+        conf.SetAtomPosition(mcsa2rdkit[catom.id], (catom.x, catom.y, 0.0))
+    rw_mol.AddConformer(conf, assignId=True)
+
+    Chem.AssignChiralTypesFromBondDirs(rw_mol)
+    Chem.DetectBondStereochemistry(rw_mol)
+    Chem.AssignStereochemistry(rw_mol, cleanIt=True, force=True)
+
+    # Drop explicit Hs now that stereo is encoded on heavy atoms / bond stereo
+    # descriptors. Without removeMapped + removeDefiningBondStereo, RDKit keeps
+    # any mapped H that participates in a perceived double-bond stereo, which
+    # then leaks an amn into the downstream SMILES round-trip.
+    _rmh = Chem.RemoveHsParameters()
+    _rmh.removeMapped = True
+    _rmh.removeDefiningBondStereo = True
+    rw_mol = Chem.RemoveHs(rw_mol, _rmh)
+
     mols = Chem.rdmolops.GetMolFrags(rw_mol, asMols=True)
-    
+
     return list(mols)
 
 def get_overall_reaction(compounds: Iterable[dict[str, str | int]], mol_path: Path) -> tuple[tuple[Chem.Mol], tuple[Chem.Mol]]:

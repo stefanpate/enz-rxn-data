@@ -26,7 +26,7 @@ def is_strictly_balanced(lhs: list[Chem.Mol], rhs: list[Chem.Mol]) -> bool:
     
     return len(lhs_elements ^ rhs_elements) == 0
 
-def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int = 1) -> dict[int, int]:
+def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], rm_stereo: bool, next_amn: int = 1) -> dict[int, int]:
     '''
     Gets mapping of ith atom map numbers to (i-1)th atom map numbers by comparing
     lhs_i and rhs_(i-1)
@@ -55,8 +55,8 @@ def back_translate(rhs_prev: list[Chem.Mol], lhs: list[Chem.Mol], next_amn: int 
                 outflux_idxs.remove(idx)
                 break
             
-            lmol_std = standardize_mol(lmol, quiet=True)
-            rmol_std = standardize_mol(rmol, quiet=True)
+            lmol_std = standardize_mol(lmol, quiet=True, neutralization_method='full', do_remove_stereo=rm_stereo)
+            rmol_std = standardize_mol(rmol, quiet=True, neutralization_method='full', do_remove_stereo=rm_stereo)
             ss_match = lmol_std.GetSubstructMatch(rmol_std)
             
             if len(ss_match) == lmol_std.GetNumAtoms(): # Standardized mols match
@@ -159,7 +159,7 @@ def main(cfg: DictConfig):
                 else:
 
                     try:
-                        back_translations, influx_idxs, outflux_idxs = back_translate(prev_rhs, lhs, next_amn)
+                        back_translations, influx_idxs, outflux_idxs = back_translate(prev_rhs, lhs, cfg.remove_stereo, next_amn)
                     except ValueError as e:
                         log.info(f"Error back translating for entry {entry_id}, mechanism {mech['mechanism_id']}, step {estep['step_id']}: {e}")
                         misannotated_mechanism = True
@@ -206,8 +206,9 @@ def main(cfg: DictConfig):
             except:
                 continue
     # Save
+    suffix = "" if cfg.remove_stereo else "_stereo"
     df = pd.DataFrame(mech_labeled_reactions, columns=columns)
-    df.to_csv("mech_labeled_reactions.csv", index=False)
+    df.to_csv(f"mech_labeled_reactions{suffix}.csv", index=False)
 
 if __name__ == "__main__":
     main()
